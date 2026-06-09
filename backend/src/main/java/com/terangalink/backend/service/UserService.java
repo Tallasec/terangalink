@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true) // Pour dire par défaut toutes les méthodes de cette classe sont dans une transaction en lecture seule.
+// Sauf les méthodes qui ont ça @Transactional
+// C'est pour la performance
 public class UserService {
 
     private final UserRepository userRepository;
@@ -39,6 +41,7 @@ public class UserService {
     }
 
     @Transactional
+    // pour creer un user
     public UserResponseDTO createUser(CreateUserRequestDTO request) {
         String normalizedEmail = emailNormalizer.normalize(request.getEmail());
         request.setEmail(normalizedEmail);
@@ -56,11 +59,13 @@ public class UserService {
         return userMapper.toResponseDto(savedUser);
     }
 
+    // pour récupérer tous les users
     public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(Objects.requireNonNull(pageable))
-                .map(userMapper::toResponseDto);
+        return userRepository.findAll(Objects.requireNonNull(pageable)) //Vérifie que pageable n'est pas null sinon leve NullPointerException
+                .map(userMapper::toResponseDto); // Pour chaque User, appelle toResponseDto(User)
     }
 
+    // pour récupérer un user par son id
     public UserResponseDTO getUserById(Long id) {
         return userMapper.toResponseDto(findUserByIdOrThrow(id));
     }
@@ -68,9 +73,9 @@ public class UserService {
     @Transactional
     public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO request) {
         User user = findUserByIdOrThrow(id);
-        validatePatchPayload(request);
-        normalizeAndValidateIncomingEmail(request);
-        validateEmailUniquenessForUpdate(request.getEmail(), user.getId());
+        validatePatchPayload(request); // pour ne pas accepter un request null (tous les champs vides)
+        normalizeAndValidateIncomingEmail(request); //pour exiger l'adresse email
+        validateEmailUniquenessForUpdate(request.getEmail(), user.getId()); // pour éviter d'utiliser un email qui existee deja
 
         userMapper.updateEntityFromDto(request, user);
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
