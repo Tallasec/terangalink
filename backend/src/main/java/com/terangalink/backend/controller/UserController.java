@@ -24,8 +24,7 @@ import java.util.Set;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "firstName", "lastName", "email", "university", "fieldOfStudy", "city", "role", "createdAt");
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "firstName", "lastName", "email", "university", "fieldOfStudy", "city", "role", "createdAt");
 
     private final UserService userService;
 
@@ -37,10 +36,10 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid CreateUserRequestDTO userRequestDTO) {
         UserResponseDTO createdUser = userService.createUser(userRequestDTO);
         return ResponseEntity
-                .created(ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/{id}")
-                        .buildAndExpand(createdUser.getId())
-                        .toUri())
+                .created(ServletUriComponentsBuilder.fromCurrentRequest() // Récupère l'URL actuelle
+                        .path("/{id}") // ajoute id sur l'URL actuelle récupèrer
+                        .buildAndExpand(createdUser.getId()) // Récupère l'id qu'on va ajouter dns l'URL
+                        .toUri()) // transforme l'URL (string) en uri (objet Java représentant une adresse de ressource)
                 .body(createdUser);
     }
 
