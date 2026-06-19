@@ -1,6 +1,7 @@
 package com.terangalink.backend.exception;
 
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.InvalidCredentialsException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -111,6 +112,21 @@ class GlobalExceptionHandlerTest {
         assertThat(body.getStatus()).isEqualTo(404);
         assertThat(body.getError()).isEqualTo("USER_NOT_FOUND");
         assertThat(body.getMessage()).isEqualTo("Utilisateur introuvable avec l'id : 42");
+    }
+
+    @Test
+    void handleInvalidCredentials_shouldReturn401() {
+        InvalidCredentialsException exception =
+                new InvalidCredentialsException("Identifiants invalides.");
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleInvalidCredentials(exception, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        ApiErrorResponse body = response.getBody();
+        assertThat(body).isNotNull();
+        assertThat(body.getStatus()).isEqualTo(401);
+        assertThat(body.getError()).isEqualTo("INVALID_CREDENTIALS");
+        assertThat(body.getMessage()).isEqualTo("Identifiants invalides.");
     }
 
     @Test

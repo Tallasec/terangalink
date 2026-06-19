@@ -1,0 +1,170 @@
+package com.terangalink.backend.service;
+
+import com.terangalink.backend.config.JwtProperties;
+import com.terangalink.backend.entity.User;
+import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.mapper.UserMapper;
+import com.terangalink.backend.repository.UserRepository;
+import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
+import com.terangalink.backend.requestDTO.LoginRequestDTO;
+import com.terangalink.backend.responseDTO.AuthResponseDTO;
+import com.terangalink.backend.responseDTO.UserResponseDTO;
+import com.terangalink.backend.security.JwtService;
+import com.terangalink.backend.security.UserPrincipal;
+import com.terangalink.backend.support.AuthTestFixtures;
+import com.terangalink.backend.support.UserTestFixtures;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private JwtProperties jwtProperties;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmailNormalizer emailNormalizer;
+
+    @InjectMocks
+    private AuthService authService;
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void register_shouldDelegateToUserServiceAndReturnAuthResponse() {
+        CreateUserRequestDTO request = UserTestFixtures.validCreateRequest();
+        UserResponseDTO createdUser = UserTestFixtures.sampleUserResponse(1L);
+        User savedUser = UserTestFixtures.sampleUser(1L);
+        UserPrincipal principal = UserPrincipal.from(savedUser);
+
+        when(userService.createUser(request)).thenReturn(createdUser);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(savedUser));
+        when(jwtProperties.getExpirationMs()).thenReturn(86_400_000L);
+        when(jwtService.generateToken(any(UserPrincipal.class))).thenReturn("jwt-token");
+        when(userMapper.toResponseDto(savedUser)).thenReturn(createdUser);
+
+        AuthResponseDTO response = authService.register(request);
+
+        assertThat(response.getAccessToken()).isEqualTo("jwt-token");
+        assertThat(response.getTokenType()).isEqualTo("Bearer");
+        assertThat(response.getExpiresIn()).isEqualTo(86_400L);
+        assertThat(response.getUser()).isEqualTo(createdUser);
+        verify(userService).createUser(request);
+    }
+
+    @Test
+    void register_shouldPropagateEmailAlreadyExistsException() {
+        CreateUserRequestDTO request = UserTestFixtures.validCreateRequest();
+        when(userService.createUser(request))
+                .thenThrow(new EmailAlreadyExistsException("Un utilisateur existe déjà avec cet email."));
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(EmailAlreadyExistsException.class);
+
+        verify(jwtService, never()).generateToken(any());
+    }
+
+    @Test
+    void login_shouldReturnAuthResponseWhenCredentialsAreValid() {
+        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+        User user = UserTestFixtures.sampleUser(1L);
+        UserPrincipal principal = UserPrincipal.from(user);
+        UserResponseDTO userResponse = UserTestFixtures.sampleUserResponse(1L);
+
+        when(emailNormalizer.normalize(request.getEmail())).thenReturn(UserTestFixtures.NORMALIZED_EMAIL);
+        when(userRepository.findByEmailIgnoreCase(UserTestFixtures.NORMALIZED_EMAIL)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(UserTestFixtures.VALID_PASSWORD, user.getPassword())).thenReturn(true);
+        when(jwtProperties.getExpirationMs()).thenReturn(86_400_000L);
+        when(jwtService.generateToken(any(UserPrincipal.class))).thenReturn("jwt-token");
+        when(userMapper.toResponseDto(user)).thenReturn(userResponse);
+
+        AuthResponseDTO response = authService.login(request);
+
+        assertThat(response.getAccessToken()).isEqualTo("jwt-token");
+        assertThat(response.getUser()).isEqualTo(userResponse);
+    }
+
+    @Test
+    void login_shouldThrowWhenEmailIsUnknown() {
+        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+
+        when(emailNormalizer.normalize(request.getEmail())).thenReturn(UserTestFixtures.NORMALIZED_EMAIL);
+        when(userRepository.findByEmailIgnoreCase(UserTestFixtures.NORMALIZED_EMAIL)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessage("Identifiants invalides.");
+    }
+
+    @Test
+    void login_shouldThrowWhenPasswordIsIncorrect() {
+        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+        User user = UserTestFixtures.sampleUser(1L);
+
+        when(emailNormalizer.normalize(request.getEmail())).thenReturn(UserTestFixtures.NORMALIZED_EMAIL);
+        when(userRepository.findByEmailIgnoreCase(UserTestFixtures.NORMALIZED_EMAIL)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(UserTestFixtures.VALID_PASSWORD, user.getPassword())).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessage("Identifiants invalides.");
+    }
+
+    @Test
+    void getCurrentUser_shouldReturnMappedProfile() {
+        User user = UserTestFixtures.sampleUser(1L);
+        UserPrincipal principal = UserPrincipal.from(user);
+        UserResponseDTO userResponse = UserTestFixtures.sampleUserResponse(1L);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userMapper.toResponseDto(user)).thenReturn(userResponse);
+
+        assertThat(authService.getCurrentUser()).isEqualTo(userResponse);
+    }
+
+    @Test
+    void getCurrentUser_shouldThrowWhenNotAuthenticated() {
+        assertThatThrownBy(() -> authService.getCurrentUser())
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessage("Utilisateur non authentifie.");
+    }
+}
