@@ -9,9 +9,12 @@ import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
 import com.terangalink.backend.requestDTO.UpdateUserRequestDTO;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
 import com.terangalink.backend.service.UserService;
+import com.terangalink.backend.security.CustomUserDetailsService;
+import com.terangalink.backend.security.JwtService;
 import com.terangalink.backend.support.UserTestFixtures;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -45,6 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(controllers = UserController.class)
 @Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
     @Autowired
@@ -55,6 +59,12 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     void createUser_shouldReturn201WithLocationAndBody() throws Exception {
