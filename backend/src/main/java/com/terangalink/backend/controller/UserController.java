@@ -61,6 +61,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers(pageRequest));
     }
 
+    @PreAuthorize("@userSecurityService.canAccessUser(#id)")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);
@@ -69,6 +70,7 @@ public class UserController {
 
 
 
+    @PreAuthorize("@userSecurityService.canAccessUser(#id)")
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDTO> patchUser(
             @PathVariable Long id,
