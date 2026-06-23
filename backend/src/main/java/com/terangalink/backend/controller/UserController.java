@@ -45,6 +45,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponseDTO>> getUsersPage(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Le numero de page doit etre superieur ou egal a 0.") int page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "La taille de page doit etre au moins 1.")

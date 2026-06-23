@@ -1,0 +1,8 @@
+package com.terangalink.backend.exception.business;
+
+public class InvalidPasswordResetTokenException extends RuntimeException {
+
+    public InvalidPasswordResetTokenException(String message) {
+        super(message);
+    }
+}

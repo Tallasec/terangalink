@@ -1,8 +1,12 @@
 package com.terangalink.backend.exception;
 
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
+import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
 import com.terangalink.backend.exception.business.InvalidUserPatchException;
+import com.terangalink.backend.exception.business.SamePasswordException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -112,6 +116,62 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCurrentPassword(
+            InvalidCurrentPasswordException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "INVALID_CURRENT_PASSWORD",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(SamePasswordException.class)
+    public ResponseEntity<ApiErrorResponse> handleSamePassword(
+            SamePasswordException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "SAME_PASSWORD",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordResetToken(
+            InvalidPasswordResetTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_PASSWORD_RESET_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ExpiredPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredPasswordResetToken(
+            ExpiredPasswordResetTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EXPIRED_PASSWORD_RESET_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

@@ -3,9 +3,16 @@ package com.terangalink.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.terangalink.backend.exception.GlobalExceptionHandler;
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
+import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
+import com.terangalink.backend.exception.business.SamePasswordException;
+import com.terangalink.backend.requestDTO.ChangePasswordRequestDTO;
 import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
+import com.terangalink.backend.requestDTO.ForgotPasswordRequestDTO;
 import com.terangalink.backend.requestDTO.LoginRequestDTO;
+import com.terangalink.backend.requestDTO.ResetPasswordRequestDTO;
 import com.terangalink.backend.responseDTO.AuthResponseDTO;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
 import com.terangalink.backend.service.AuthService;
@@ -24,7 +31,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -138,6 +148,159 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.email").value(UserTestFixtures.NORMALIZED_EMAIL));
+    }
+
+    @Test
+    void changePassword_shouldReturn204() throws Exception {
+        ChangePasswordRequestDTO request = changePasswordRequest();
+        doNothing().when(authService).changePassword(any(ChangePasswordRequestDTO.class));
+
+        mockMvc.perform(patch("/api/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void changePassword_shouldReturn400WhenNewPasswordIsInvalid() throws Exception {
+        ChangePasswordRequestDTO request = changePasswordRequest();
+        request.setNewPassword("weak");
+
+        mockMvc.perform(patch("/api/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details.newPassword").exists());
+    }
+
+    @Test
+    void changePassword_shouldReturn401WhenCurrentPasswordIsInvalid() throws Exception {
+        ChangePasswordRequestDTO request = changePasswordRequest();
+        org.mockito.Mockito.doThrow(new InvalidCurrentPasswordException("Le mot de passe actuel est incorrect."))
+                .when(authService).changePassword(any(ChangePasswordRequestDTO.class));
+
+        mockMvc.perform(patch("/api/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("INVALID_CURRENT_PASSWORD"));
+    }
+
+    @Test
+    void changePassword_shouldReturn400WhenPasswordIsUnchanged() throws Exception {
+        ChangePasswordRequestDTO request = changePasswordRequest();
+        org.mockito.Mockito.doThrow(new SamePasswordException("Le nouveau mot de passe doit etre different."))
+                .when(authService).changePassword(any(ChangePasswordRequestDTO.class));
+
+        mockMvc.perform(patch("/api/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("SAME_PASSWORD"));
+    }
+
+    @Test
+    void forgotPassword_shouldReturn204() throws Exception {
+        ForgotPasswordRequestDTO request = forgotPasswordRequest("alice@example.com");
+        doNothing().when(authService).forgotPassword(any(ForgotPasswordRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void forgotPassword_shouldReturn204ForUnknownEmail() throws Exception {
+        ForgotPasswordRequestDTO request = forgotPasswordRequest("unknown@example.com");
+        doNothing().when(authService).forgotPassword(any(ForgotPasswordRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void forgotPassword_shouldReturn400WhenEmailIsInvalid() throws Exception {
+        ForgotPasswordRequestDTO request = forgotPasswordRequest("invalid-email");
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void resetPassword_shouldReturn204() throws Exception {
+        ResetPasswordRequestDTO request = resetPasswordRequest();
+        doNothing().when(authService).resetPassword(any(ResetPasswordRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void resetPassword_shouldReturn400WhenPasswordIsInvalid() throws Exception {
+        ResetPasswordRequestDTO request = resetPasswordRequest();
+        request.setNewPassword("weak");
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details.newPassword").exists());
+    }
+
+    @Test
+    void resetPassword_shouldReturn400WhenTokenIsInvalid() throws Exception {
+        ResetPasswordRequestDTO request = resetPasswordRequest();
+        doThrow(new InvalidPasswordResetTokenException("Token invalide."))
+                .when(authService).resetPassword(any(ResetPasswordRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_PASSWORD_RESET_TOKEN"));
+    }
+
+    @Test
+    void resetPassword_shouldReturn400WhenTokenIsExpired() throws Exception {
+        ResetPasswordRequestDTO request = resetPasswordRequest();
+        doThrow(new ExpiredPasswordResetTokenException("Token expire."))
+                .when(authService).resetPassword(any(ResetPasswordRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("EXPIRED_PASSWORD_RESET_TOKEN"));
+    }
+
+    private ChangePasswordRequestDTO changePasswordRequest() {
+        ChangePasswordRequestDTO request = new ChangePasswordRequestDTO();
+        request.setCurrentPassword("Password1!");
+        request.setNewPassword("NewPassword2!");
+        return request;
+    }
+
+    private ForgotPasswordRequestDTO forgotPasswordRequest(String email) {
+        ForgotPasswordRequestDTO request = new ForgotPasswordRequestDTO();
+        request.setEmail(email);
+        return request;
+    }
+
+    private ResetPasswordRequestDTO resetPasswordRequest() {
+        ResetPasswordRequestDTO request = new ResetPasswordRequestDTO();
+        request.setToken("550e8400-e29b-41d4-a716-446655440000");
+        request.setNewPassword("NewPassword2!");
+        return request;
     }
 
     private AuthResponseDTO buildAuthResponse() {
