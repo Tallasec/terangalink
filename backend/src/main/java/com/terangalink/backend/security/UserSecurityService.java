@@ -26,6 +26,9 @@ public class UserSecurityService {
             return true;
         }
 
+
         return userId != null && userId.equals(userPrincipal.getId());
     }
+
+
 }

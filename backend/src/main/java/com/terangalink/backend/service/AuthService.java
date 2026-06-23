@@ -1,12 +1,21 @@
 package com.terangalink.backend.service;
 import  com.terangalink.backend.entity.User;
 import com.terangalink.backend.config.JwtProperties;
+import com.terangalink.backend.entity.PasswordResetToken;
+import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
+import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
+import com.terangalink.backend.exception.business.SamePasswordException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import com.terangalink.backend.mapper.UserMapper;
+import com.terangalink.backend.repository.PasswordResetTokenRepository;
 import com.terangalink.backend.repository.UserRepository;
+import com.terangalink.backend.requestDTO.ChangePasswordRequestDTO;
 import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
+import com.terangalink.backend.requestDTO.ForgotPasswordRequestDTO;
 import com.terangalink.backend.requestDTO.LoginRequestDTO;
+import com.terangalink.backend.requestDTO.ResetPasswordRequestDTO;
 import com.terangalink.backend.responseDTO.AuthResponseDTO;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
 import com.terangalink.backend.security.JwtService;
@@ -15,11 +24,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     private static final String INVALID_CREDENTIALS_MESSAGE = "Identifiants invalides.";
+    private static final long PASSWORD_RESET_TOKEN_VALIDITY_MINUTES = 30;
 
     private final UserService userService;
     private final JwtService jwtService;
@@ -28,6 +46,7 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailNormalizer emailNormalizer;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     public AuthService(
             UserService userService,
@@ -36,7 +55,8 @@ public class AuthService {
             UserRepository userRepository,
             UserMapper userMapper,
             PasswordEncoder passwordEncoder,
-            EmailNormalizer emailNormalizer) {
+            EmailNormalizer emailNormalizer,
+            PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.jwtProperties = jwtProperties;
@@ -44,6 +64,7 @@ public class AuthService {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.emailNormalizer = emailNormalizer;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
 
@@ -70,6 +91,66 @@ public class AuthService {
     public UserResponseDTO getCurrentUser() {
         UserPrincipal principal = getCurrentPrincipal();
         return userMapper.toResponseDto(loadUserById(principal.getId()));
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequestDTO request) {
+        UserPrincipal principal = getCurrentPrincipal();
+        User user = loadUserById(principal.getId());
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidCurrentPasswordException("Le mot de passe actuel est incorrect.");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new SamePasswordException("Le nouveau mot de passe doit etre different du mot de passe actuel.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequestDTO request) {
+        String normalizedEmail = emailNormalizer.normalize(request.getEmail());
+
+        userRepository.findByEmailIgnoreCase(normalizedEmail).ifPresent(user -> {
+            PasswordResetToken passwordResetToken = new PasswordResetToken();
+            passwordResetToken.setToken(UUID.randomUUID().toString());
+            passwordResetToken.setUser(user);
+            passwordResetToken.setExpiresAt(
+                    LocalDateTime.now().plusMinutes(PASSWORD_RESET_TOKEN_VALIDITY_MINUTES));
+            passwordResetToken.setUsed(false);
+
+            passwordResetTokenRepository.save(passwordResetToken);
+            LOGGER.info(
+                    "Token de reinitialisation de mot de passe genere pour l'utilisateur {} : {}",
+                    user.getId(),
+                    passwordResetToken.getToken()
+            );
+        });
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDTO request) {
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new InvalidPasswordResetTokenException(
+                        "Le token de reinitialisation est invalide."));
+
+        if (passwordResetToken.isUsed()) {
+            throw new InvalidPasswordResetTokenException("Le token de reinitialisation a deja ete utilise.");
+        }
+
+        if (!passwordResetToken.getExpiresAt().isAfter(LocalDateTime.now())) {
+            throw new ExpiredPasswordResetTokenException("Le token de reinitialisation a expire.");
+        }
+
+        User user = passwordResetToken.getUser();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        passwordResetToken.setUsed(true);
+
+        userRepository.save(user);
+        passwordResetTokenRepository.save(passwordResetToken);
     }
 
     // Methode pour récupérer l'utilisateur actuellement connecté
