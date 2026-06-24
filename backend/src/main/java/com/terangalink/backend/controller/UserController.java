@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -24,8 +25,7 @@ import java.util.Set;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "firstName", "lastName", "email", "university", "fieldOfStudy", "city", "role", "createdAt");
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "firstName", "lastName", "email", "university", "fieldOfStudy", "city", "role", "createdAt");
 
     private final UserService userService;
 
@@ -37,14 +37,15 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid CreateUserRequestDTO userRequestDTO) {
         UserResponseDTO createdUser = userService.createUser(userRequestDTO);
         return ResponseEntity
-                .created(ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/{id}")
-                        .buildAndExpand(createdUser.getId())
-                        .toUri())
+                .created(ServletUriComponentsBuilder.fromCurrentRequest() // Récupère l'URL actuelle
+                        .path("/{id}") // ajoute id sur l'URL actuelle récupèrer
+                        .buildAndExpand(createdUser.getId()) // Récupère l'id qu'on va ajouter dns l'URL
+                        .toUri()) // transforme l'URL (string) en uri (objet Java représentant une adresse de ressource)
                 .body(createdUser);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponseDTO>> getUsersPage(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Le numero de page doit etre superieur ou egal a 0.") int page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "La taille de page doit etre au moins 1.")
@@ -61,6 +62,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers(pageRequest));
     }
 
+    @PreAuthorize("@userSecurityService.canAccessUser(#id)")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);
@@ -69,6 +71,7 @@ public class UserController {
 
 
 
+    @PreAuthorize("@userSecurityService.canAccessUser(#id)")
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDTO> patchUser(
             @PathVariable Long id,
@@ -77,6 +80,8 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

@@ -1,7 +1,5 @@
 package com.terangalink.backend;
 
-import com.terangalink.backend.entity.User;
-import com.terangalink.backend.repository.UserRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

@@ -49,6 +49,10 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
+    // Verification email
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean emailVerified = false;
+
     // Université en France
     @Column(nullable = false, length = 150)
     private String university;
