@@ -1,9 +1,13 @@
 package com.terangalink.backend.exception;
 
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.EmailAlreadyVerifiedException;
+import com.terangalink.backend.exception.business.EmailNotVerifiedException;
+import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
 import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
 import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException;
 import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
 import com.terangalink.backend.exception.business.InvalidUserPatchException;
 import com.terangalink.backend.exception.business.SamePasswordException;
@@ -168,6 +172,62 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "EXPIRED_PASSWORD_RESET_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(InvalidEmailVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidEmailVerificationToken(
+            InvalidEmailVerificationTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_EMAIL_VERIFICATION_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ExpiredEmailVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredEmailVerificationToken(
+            ExpiredEmailVerificationTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EXPIRED_EMAIL_VERIFICATION_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailNotVerified(
+            EmailNotVerifiedException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "EMAIL_NOT_VERIFIED",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailAlreadyVerified(
+            EmailAlreadyVerifiedException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EMAIL_ALREADY_VERIFIED",
                 ex.getMessage(),
                 request.getRequestURI()
         );
