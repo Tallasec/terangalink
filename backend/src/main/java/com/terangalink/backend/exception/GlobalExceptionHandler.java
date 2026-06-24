@@ -1,7 +1,16 @@
 package com.terangalink.backend.exception;
 
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.EmailAlreadyVerifiedException;
+import com.terangalink.backend.exception.business.EmailNotVerifiedException;
+import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
+import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
+import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
+import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException;
+import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
 import com.terangalink.backend.exception.business.InvalidUserPatchException;
+import com.terangalink.backend.exception.business.SamePasswordException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -16,6 +25,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.LinkedHashMap;
@@ -98,6 +108,132 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(
+            InvalidCredentialsException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "INVALID_CREDENTIALS",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCurrentPassword(
+            InvalidCurrentPasswordException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "INVALID_CURRENT_PASSWORD",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(SamePasswordException.class)
+    public ResponseEntity<ApiErrorResponse> handleSamePassword(
+            SamePasswordException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "SAME_PASSWORD",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordResetToken(
+            InvalidPasswordResetTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_PASSWORD_RESET_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ExpiredPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredPasswordResetToken(
+            ExpiredPasswordResetTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EXPIRED_PASSWORD_RESET_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(InvalidEmailVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidEmailVerificationToken(
+            InvalidEmailVerificationTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_EMAIL_VERIFICATION_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ExpiredEmailVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredEmailVerificationToken(
+            ExpiredEmailVerificationTokenException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EXPIRED_EMAIL_VERIFICATION_TOKEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailNotVerified(
+            EmailNotVerifiedException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "EMAIL_NOT_VERIFIED",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailAlreadyVerified(
+            EmailAlreadyVerifiedException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EMAIL_ALREADY_VERIFIED",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException ex,
@@ -166,6 +302,20 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(
+            AccessDeniedException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "ACCESS_DENIED",
+                "Acces refuse.",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     // ERREUR SERVEUR (fallback)
