@@ -3,9 +3,11 @@ package com.terangalink.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.terangalink.backend.exception.GlobalExceptionHandler;
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.EmailNotVerifiedException;
 import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
 import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
+import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
 import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
 import com.terangalink.backend.exception.business.SamePasswordException;
 import com.terangalink.backend.requestDTO.ChangePasswordRequestDTO;
@@ -136,6 +138,21 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"));
+    }
+
+    @Test
+    void login_shouldReturn403WhenEmailIsNotVerified() throws Exception {
+        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+
+        when(authService.login(any(LoginRequestDTO.class)))
+                .thenThrow(new EmailNotVerifiedException(
+                        "Veuillez vérifier votre adresse email avant de vous connecter."));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("EMAIL_NOT_VERIFIED"));
     }
 
     @Test
@@ -281,6 +298,36 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("EXPIRED_PASSWORD_RESET_TOKEN"));
+    }
+
+    @Test
+    void verifyEmail_shouldReturn204() throws Exception {
+        mockMvc.perform(get("/api/auth/verify-email")
+                        .param("token", "550e8400-e29b-41d4-a716-446655440000"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void verifyEmail_shouldReturn400WhenTokenIsInvalid() throws Exception {
+        doThrow(new com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException(
+                "Le token de verification email est invalide."))
+                .when(authService).verifyEmail(any(com.terangalink.backend.requestDTO.VerifyEmailRequestDTO.class));
+
+        mockMvc.perform(get("/api/auth/verify-email")
+                        .param("token", "invalid-token"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_EMAIL_VERIFICATION_TOKEN"));
+    }
+
+    @Test
+    void verifyEmail_shouldReturn400WhenTokenIsExpired() throws Exception {
+        doThrow(new ExpiredEmailVerificationTokenException("Le token de verification email a expire."))
+                .when(authService).verifyEmail(any(com.terangalink.backend.requestDTO.VerifyEmailRequestDTO.class));
+
+        mockMvc.perform(get("/api/auth/verify-email")
+                        .param("token", "550e8400-e29b-41d4-a716-446655440000"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("EXPIRED_EMAIL_VERIFICATION_TOKEN"));
     }
 
     private ChangePasswordRequestDTO changePasswordRequest() {

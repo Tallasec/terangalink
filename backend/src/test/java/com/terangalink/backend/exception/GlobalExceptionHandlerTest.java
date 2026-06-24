@@ -1,6 +1,7 @@
 package com.terangalink.backend.exception;
 
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
+import com.terangalink.backend.exception.business.EmailNotVerifiedException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -127,6 +128,21 @@ class GlobalExceptionHandlerTest {
         assertThat(body.getStatus()).isEqualTo(401);
         assertThat(body.getError()).isEqualTo("INVALID_CREDENTIALS");
         assertThat(body.getMessage()).isEqualTo("Identifiants invalides.");
+    }
+
+    @Test
+    void handleEmailNotVerified_shouldReturn403() {
+        EmailNotVerifiedException exception =
+                new EmailNotVerifiedException("Veuillez vérifier votre adresse email avant de vous connecter.");
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleEmailNotVerified(exception, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        ApiErrorResponse body = response.getBody();
+        assertThat(body).isNotNull();
+        assertThat(body.getStatus()).isEqualTo(403);
+        assertThat(body.getError()).isEqualTo("EMAIL_NOT_VERIFIED");
+        assertThat(body.getMessage()).isEqualTo("Veuillez vérifier votre adresse email avant de vous connecter.");
     }
 
     @Test

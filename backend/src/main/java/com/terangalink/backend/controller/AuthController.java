@@ -5,6 +5,7 @@ import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
 import com.terangalink.backend.requestDTO.ForgotPasswordRequestDTO;
 import com.terangalink.backend.requestDTO.LoginRequestDTO;
 import com.terangalink.backend.requestDTO.ResetPasswordRequestDTO;
+import com.terangalink.backend.requestDTO.VerifyEmailRequestDTO;
 import com.terangalink.backend.responseDTO.AuthResponseDTO;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
 import com.terangalink.backend.service.AuthService;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +61,12 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@RequestBody @Valid ResetPasswordRequestDTO request) {
         authService.resetPassword(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmail(@ModelAttribute @Valid VerifyEmailRequestDTO request) {
+        authService.verifyEmail(request);
         return ResponseEntity.noContent().build();
     }
 }
