@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -74,6 +76,11 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+
+    // Logements publiés par l'utilisateur.
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    private List<HousingPost> housingPosts = new ArrayList<>();
+
     @PrePersist
     public void onCreate() {
         if (createdAt == null) {
@@ -92,4 +99,6 @@ public class User {
             email = email.trim().toLowerCase(Locale.ROOT);
         }
     }
+
+
 }

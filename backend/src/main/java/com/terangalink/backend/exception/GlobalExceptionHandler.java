@@ -5,6 +5,8 @@ import com.terangalink.backend.exception.business.EmailAlreadyVerifiedException;
 import com.terangalink.backend.exception.business.EmailNotVerifiedException;
 import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
 import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
+import com.terangalink.backend.exception.business.HousingImageNotFoundException;
+import com.terangalink.backend.exception.business.HousingNotFoundException;
 import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
 import com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException;
@@ -102,6 +104,34 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "USER_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(HousingNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleHousingNotFound(
+            HousingNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "HOUSING_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(HousingImageNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleHousingImageNotFound(
+            HousingImageNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "HOUSING_IMAGE_NOT_FOUND",
                 ex.getMessage(),
                 request.getRequestURI()
         );
