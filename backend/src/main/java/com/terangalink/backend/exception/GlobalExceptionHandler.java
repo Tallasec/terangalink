@@ -1,17 +1,6 @@
 package com.terangalink.backend.exception;
 
-import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
-import com.terangalink.backend.exception.business.EmailAlreadyVerifiedException;
-import com.terangalink.backend.exception.business.EmailNotVerifiedException;
-import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
-import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
-import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
-import com.terangalink.backend.exception.business.InvalidCredentialsException;
-import com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException;
-import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
-import com.terangalink.backend.exception.business.InvalidUserPatchException;
-import com.terangalink.backend.exception.business.SamePasswordException;
-import com.terangalink.backend.exception.business.UserNotFoundException;
+import com.terangalink.backend.exception.business.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -105,6 +94,50 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(HousingNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleHousingNotFound(
+            HousingNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "HOUSING_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(HousingImageNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleHousingImageNotFound(
+            HousingImageNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "HOUSING_IMAGE_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ForumNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleForumNotFound(
+            ForumNotFoundException ex,
+            HttpServletRequest request
+    ) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "FORUM_TOPIC_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 

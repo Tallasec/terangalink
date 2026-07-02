@@ -1,52 +1,96 @@
 package com.terangalink.backend.entity;
 
+import com.terangalink.backend.enums.HousingType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-/*
-HOUSING ENTITY
-Représente une annonce logement.
-*/
-
+/**
+ * Représente une annonce de logement publiée par un utilisateur.
+ */
 @Entity
 @Table(name = "housing_posts")
-
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class HousingPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Titre annonce
+    /**
+     * Titre de l'annonce.
+     */
+    @NotBlank
+    @Column(nullable = false, length = 150)
     private String title;
 
-    // Description logement
+    /**
+     * Description détaillée du logement.
+     */
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Ville
+    /**
+     * Ville où se situe le logement.
+     */
+    @NotBlank
+    @Column(nullable = false, length = 100)
     private String city;
 
-    // Prix logement
-    private Double price;
+    /**
+     * Adresse du logement.
+     */
+    @Column(length = 255)
+    private String address;
 
-    // Type logement
-    // Studio / Colocation / Chambre
-    private String housingType;
+    /**
+     * Prix mensuel du logement.
+     */
+    @NotNull
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
-    // Auteur annonce
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    /**
+     * Type de logement.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private HousingType housingType;
 
-    // Date publication
+    /**
+     * Disponibilité du logement.
+     */
+    @Column(nullable = false)
+    private boolean available = true;
+
+    /**
+     * Propriétaire de l'annonce.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    /**
+     * Date de création.
+     */
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    /**
+     * Date de dernière modification.
+     */
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "housing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HousingImage> images = new ArrayList<>();
 }
