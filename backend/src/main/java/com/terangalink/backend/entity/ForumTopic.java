@@ -1,47 +1,66 @@
 package com.terangalink.backend.entity;
 
+import com.terangalink.backend.enums.ForumCategory;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
-ANSWER ENTITY
+FORUM TOPIC ENTITY
 
-Représente une réponse publiée
-sur un sujet du forum.
+Représente un sujet publié par un étudiant
+sur le forum TerangaLink.
 */
 
 @Entity
-@Table(name = "answers")
+@Table(name = "forum_topics")
 
 @Getter
 @Setter
 @NoArgsConstructor
 
-public class Answer {
+public class ForumTopic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Contenu de la réponse
+    // Titre du sujet
+    @Column(nullable = false, length = 150)
+    private String title;
+
+    // Contenu du sujet
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    // Sujet associé
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "forum_topic_id", nullable = false)
-    private ForumTopic forumTopic;
+    // Catégorie du sujet
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private ForumCategory category;
 
-    // Auteur de la réponse
+    // Auteur du sujet
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    // Réponse active ou supprimée
+    // Réponses du sujet
+    @OneToMany(
+            mappedBy = "forumTopic",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Answer> answers = new ArrayList<>();
+
+    // Nombre de vues
+    @Column(nullable = false)
+    private Long views = 0L;
+
+    // Sujet actif ou supprimé
     @Column(nullable = false)
     private boolean deleted = false;
 
