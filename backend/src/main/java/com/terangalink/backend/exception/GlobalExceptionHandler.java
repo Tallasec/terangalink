@@ -1,19 +1,6 @@
 package com.terangalink.backend.exception;
 
-import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
-import com.terangalink.backend.exception.business.EmailAlreadyVerifiedException;
-import com.terangalink.backend.exception.business.EmailNotVerifiedException;
-import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
-import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
-import com.terangalink.backend.exception.business.HousingImageNotFoundException;
-import com.terangalink.backend.exception.business.HousingNotFoundException;
-import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
-import com.terangalink.backend.exception.business.InvalidCredentialsException;
-import com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException;
-import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
-import com.terangalink.backend.exception.business.InvalidUserPatchException;
-import com.terangalink.backend.exception.business.SamePasswordException;
-import com.terangalink.backend.exception.business.UserNotFoundException;
+import com.terangalink.backend.exception.business.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -135,6 +122,38 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ForumNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleForumNotFound(
+            ForumNotFoundException ex,
+            HttpServletRequest request
+    ) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "FORUM_TOPIC_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(AnswerNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleAnswerNotFound(
+            AnswerNotFoundException ex,
+            HttpServletRequest request
+    ) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "ANSWER_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
