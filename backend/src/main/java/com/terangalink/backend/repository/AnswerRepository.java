@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /*
 ANSWER REPOSITORY
@@ -16,19 +17,7 @@ du forum.
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
 
-    // Liste des réponses d'un sujet
-    List<Answer> findByForumTopicIdAndDeletedFalseOrderByCreatedAtAsc(
-            Long forumTopicId
-    );
+    List<Answer> findByForumTopicIdAndDeletedFalseOrderByCreatedAtAsc(Long forumTopicId);
 
-    // Nombre de réponses d'un sujet
-    long countByForumTopicIdAndDeletedFalse(
-            Long forumTopicId
-    );
-
-    // Vérifie si une réponse existe
-    boolean existsByIdAndDeletedFalse(
-            Long id
-    );
-
+    Optional<Answer> findByIdAndDeletedFalse(Long id);
 }

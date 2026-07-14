@@ -39,11 +39,9 @@ public class AnswerMapper {
         }
 
         if (answer.getAuthor() != null) {
-
             dto.setAuthorId(answer.getAuthor().getId());
             dto.setAuthorFirstName(answer.getAuthor().getFirstName());
             dto.setAuthorLastName(answer.getAuthor().getLastName());
-
         }
 
         dto.setCreatedAt(answer.getCreatedAt());
@@ -61,7 +59,5 @@ public class AnswerMapper {
         if (dto.getContent() != null) {
             answer.setContent(dto.getContent());
         }
-
     }
-
 }

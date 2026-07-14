@@ -6,7 +6,7 @@ Parce qu’aucun étudiant ne devrait avancer seul.
 
 🚀 À propos du projet 
 
-TerangaLink est une plateforme communautaire destinée aux étudiants internationaux, particulièrement les étudiants africains souhaitant poursuivre leurs études en France. 
+TerangaLink est une plateforme communautaire destinée aux étudiants internationaux, particulièrement les étudiants senegalais souhaitant poursuivre leurs études en France. 
 
 L’objectif de la plateforme est de centraliser les informations utiles liées à l’intégration académique, administrative et sociale des étudiants afin de faciliter leur arrivée et leur réussite universitaire. 
 
@@ -20,7 +20,7 @@ les démarches administratives
 
 les emplois étudiants 
 
-les associations étudiantes 
+les associations étudiantes, dahira 
 
 les groupes d’entraide 
 
@@ -194,6 +194,12 @@ Postman
 
 Figma 
 
+intellij
+
+
+
+
+
  
 
 🏗️ Architecture du projet 
@@ -264,7 +270,7 @@ JWT Authentication
 
 📱 Responsive Design 
 
-La plateforme est pensée principalement pour une utilisation mobile afin de répondre aux habitudes des étudiants. 
+La plateforme adopte une approche responsive, permettant une utilisation fluide aussi bien sur smartphone que sur ordinateur.
 
 #acompleter 
 
