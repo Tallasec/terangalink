@@ -1,15 +1,19 @@
 package com.terangalink.backend.entity;
 
+import com.terangalink.backend.enums.ContractType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /*
-JOB ENTITY
-Représente une offre d'emploi étudiant.
+JOB POST ENTITY
+
+Représente une offre d'emploi
+publiée par un utilisateur.
 */
 
 @Entity
@@ -25,28 +29,66 @@ public class JobPost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Titre emploi
+    // Titre de l'offre
+    @Column(nullable = false)
     private String title;
 
-    // Description emploi
-    @Column(columnDefinition = "TEXT")
+    // Description de l'offre
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    // Ville
-    private String city;
-
-    // Type contrat
-    // Stage / CDI / CDD / Alternance
-    private String contractType;
-
-    // Entreprise
+    // Nom de l'entreprise
+    @Column(nullable = false)
     private String companyName;
 
-    // Auteur publication
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    // Ville
+    @Column(nullable = false)
+    private String city;
 
-    // Date publication
-    private LocalDateTime createdAt = LocalDateTime.now();
+    // Adresse
+    private String address;
+
+    // Type de contrat
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ContractType contractType;
+
+    // Salaire
+    private BigDecimal salary;
+
+    // Offre disponible
+    @Column(nullable = false)
+    private boolean available = true;
+
+    // Offre supprimée
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    // Auteur de l'offre
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
+
+    // Date de création
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // Date de modification
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 }
