@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "5f8fae4e-6f8a-4b8f-9d4b-8b1e7f8d06d1",
+    "name": "TerangaLink - Association API",
+    "description": "Collection Postman pour tester le module Association de TerangaLink.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "associationId",
+      "value": "10"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Association",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"TerangaLink Association\",\n  \"description\": \"Association etudiante et culturelle.\",\n  \"city\": \"Dakar\",\n  \"address\": \"Plateau\",\n  \"contactEmail\": \"contact@terangalink.org\",\n  \"phone\": \"+221770000000\",\n  \"website\": \"https://terangalink.org\",\n  \"logoUrl\": \"https://terangalink.org/logo.png\",\n  \"associationType\": \"DAHIRA\",\n  \"available\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/associations",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "associations"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Associations",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/associations",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "associations"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Association By Id",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/associations/{{associationId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "associations",
+            "{{associationId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Associations",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/associations/search?title=TerangaLink&city=Dakar&associationType=DAHIRA&available=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "associations",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "title",
+              "value": "TerangaLink"
+            },
+            {
+              "key": "city",
+              "value": "Dakar"
+            },
+            {
+              "key": "associationType",
+              "value": "DAHIRA"
+            },
+            {
+              "key": "available",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Association",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"TerangaLink Association Renovee\",\n  \"available\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/associations/{{associationId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "associations",
+            "{{associationId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Association",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/associations/{{associationId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "associations",
+            "{{associationId}}"
+          ]
+        }
+      }
+    }
+  ]
+}

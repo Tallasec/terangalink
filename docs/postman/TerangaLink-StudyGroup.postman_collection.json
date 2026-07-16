@@ -1,0 +1,234 @@
+{
+  "info": {
+    "_postman_id": "3ed5aef8-cc22-4cf0-a0da-65b6e7cb5c79",
+    "name": "TerangaLink - StudyGroup API",
+    "description": "Collection Postman pour tester le module StudyGroup de TerangaLink.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "studyGroupId",
+      "value": "10"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Study Group",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Révisions Java\",\n  \"subject\": \"Mathématiques\",\n  \"description\": \"Séance de révision pour les examens.\",\n  \"city\": \"Dakar\",\n  \"location\": \"Bibliothèque\",\n  \"meetingType\": \"ONLINE\",\n  \"meetingDate\": \"2026-08-01T10:00:00\",\n  \"maxMembers\": 8,\n  \"available\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/study-groups",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "study-groups"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Study Groups",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/study-groups",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "study-groups"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Study Group By Id",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/study-groups/{{studyGroupId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "study-groups",
+            "{{studyGroupId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Study Groups",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/study-groups/search?title=Révisions&subject=Mathématiques&city=Dakar&meetingType=ONLINE&available=true&meetingDate=2026-08-01T10:00:00",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "study-groups",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "title",
+              "value": "Révisions"
+            },
+            {
+              "key": "subject",
+              "value": "Mathématiques"
+            },
+            {
+              "key": "city",
+              "value": "Dakar"
+            },
+            {
+              "key": "meetingType",
+              "value": "ONLINE"
+            },
+            {
+              "key": "available",
+              "value": "true"
+            },
+            {
+              "key": "meetingDate",
+              "value": "2026-08-01T10:00:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Study Group",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Révisions Java Avancées\",\n  \"maxMembers\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/study-groups/{{studyGroupId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "study-groups",
+            "{{studyGroupId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Study Group",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/study-groups/{{studyGroupId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "study-groups",
+            "{{studyGroupId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
