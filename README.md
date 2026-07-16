@@ -1,357 +1,284 @@
-# terangalink
-La plateforme qui connecte les étudiants grâce à l’esprit de la teranga.
-Parce qu’aucun étudiant ne devrait avancer seul. 
+# 🎓 TerangaLink
 
- 
+> **La plateforme qui connecte les étudiants grâce à l'esprit de la Teranga.**
+>
+> *Parce qu'aucun étudiant ne devrait avancer seul.*
 
-🚀 À propos du projet 
+---
 
-TerangaLink est une plateforme communautaire destinée aux étudiants internationaux, particulièrement les étudiants senegalais souhaitant poursuivre leurs études en France. 
+# 🚀 À propos
 
-L’objectif de la plateforme est de centraliser les informations utiles liées à l’intégration académique, administrative et sociale des étudiants afin de faciliter leur arrivée et leur réussite universitaire. 
+TerangaLink est une plateforme communautaire destinée aux étudiants internationaux, avec un premier focus sur les étudiants sénégalais souhaitant poursuivre leurs études en France.
 
-Aujourd’hui, beaucoup d’étudiants utilisent principalement des groupes WhatsApp ou des réseaux sociaux pour trouver des informations concernant : 
+L'objectif est de centraliser les informations essentielles concernant les études, le logement, les démarches administratives, les emplois étudiants et la vie associative afin de faciliter l'intégration et la réussite universitaire.
 
-les études 
+Aujourd'hui, de nombreux étudiants utilisent principalement WhatsApp, Facebook ou d'autres réseaux sociaux pour rechercher des informations.
 
-le logement 
+Ces informations sont souvent :
 
-les démarches administratives 
+- dispersées
+- répétitives
+- difficiles à retrouver
+- peu fiables
 
-les emplois étudiants 
+TerangaLink propose une plateforme collaborative, moderne et centralisée permettant aux étudiants de partager leurs expériences et de s'entraider efficacement.
 
-les associations étudiantes, dahira 
+---
 
-les groupes d’entraide 
+# ✨ Fonctionnalités
 
-Cependant, ces informations sont souvent désorganisées, répétitives ou difficiles à retrouver. 
+## 🔐 Authentification
 
-TerangaLink propose une solution centralisée, structurée et collaborative permettant aux étudiants de s’entraider efficacement. 
+- Inscription
+- Connexion
+- Authentification JWT
+- Gestion des rôles
+- Sécurisation des endpoints
 
- 
+---
 
-✨ Fonctionnalités principales 
+## 💬 Forum communautaire
 
-🔐 Authentification 
+- Création de sujets
+- Réponses aux discussions
+- Consultation des échanges
+- Catégories :
 
-Création de compte 
+  - Études
+  - Logement
+  - Administratif
+  - Alternance
+  - Emploi
+  - Vie étudiante
+  - Événements
 
-Connexion / déconnexion 
+---
 
-Gestion des profils utilisateurs 
+## 🏠 Logements
 
- 
+- Publication d'annonces
+- Consultation des annonces
+- Recherche dynamique
+- Pagination
+- Tri
+- Modification
+- Suppression logique
 
-❓ Questions / Réponses 
+---
 
-Publication de questions 
+## 💼 Offres d'emploi
 
-Réponses communautaires 
+- Publication d'offres
+- Recherche avancée
+- Pagination
+- Tri
+- Gestion des offres
 
-Consultation des discussions 
+---
 
-Organisation des échanges 
+## 👥 Groupes de révision
 
- 
+- Création de groupes d'étude
+- Organisation de séances
+- Recherche par matière
+- Recherche par ville
+- Gestion des groupes
 
-📚 Catégories et tags 
+---
 
-Catégories : 
+## 🤝 Associations étudiantes
 
-Études 
+- Découverte des associations
+- Dahiras
+- Associations étudiantes
+- Associations sportives
+- Associations culturelles
+- Informations de contact
 
-Logement 
+---
 
-Emploi 
+# 🛠️ Stack technique
 
-Administratif 
+## Backend
 
-Vie étudiante 
+- Java 21
+- Spring Boot
+- Spring Security
+- JWT
+- Spring Data JPA
+- Hibernate
+- PostgreSQL
+- Maven
 
-Tags : 
+---
 
-examen 
+## Frontend
 
-visa 
+- React
+- Vite
+- Tailwind CSS
 
-cours 
+---
 
-CAF 
+## Outils
 
-TD 
+- Git
+- GitHub
+- Postman
+- Figma
+- IntelliJ IDEA
 
-inscription 
+---
 
- 
+# 🏗️ Architecture Backend
 
-🔎 Recherche 
+Le backend suit une architecture REST inspirée des bonnes pratiques de Spring Boot.
 
-Recherche par mots-clés 
+```
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+PostgreSQL
+```
 
-Filtrage des contenus 
+Chaque module est organisé selon la même structure :
 
-Navigation simplifiée 
+```
+Entity
 
- 
+DTO
 
-👍 Votes 
+Mapper
 
-Mise en avant des réponses utiles 
+Repository
 
-Amélioration de la fiabilité des informations 
+Specification
 
- 
+Service
 
-🏠 Logement et emploi étudiant 
+SecurityService
 
-Publication d’annonces 
+Controller
 
-Recherche d’opportunités 
+Tests
+```
 
-Consultation des offres disponibles 
+Cette architecture facilite la maintenance, les évolutions et les tests.
 
- 
+---
 
-👥 Groupes de révision 
+# 🗄️ Modèle de données
 
-Création de groupes d’étude 
+Les principales entités sont :
 
-Organisation de séances de révision 
+- User
+- ForumTopic
+- Answer
+- HousingPost
+- JobPost
+- StudyGroup
+- Association
 
-Entraide académique entre étudiants 
+---
 
- 
+# 🔐 Sécurité
 
-🛂 Aide administrative et visa 
+Le projet utilise :
 
-Demandes d’aide concernant : 
+- Spring Security
+- JWT Authentication
+- Gestion des rôles
+- Protection des endpoints
+- Contrôle d'accès par propriétaire
+- Soft Delete
 
-attestation d’hébergement 
+---
 
-garant financier 
+# 📱 Responsive Design
 
-Campus France 
+Le frontend est développé selon une approche **Mobile First** afin d'offrir une expérience optimale sur smartphone, tablette et ordinateur.
 
-visa 
+---
 
-démarches administratives 
+# 🚀 Roadmap
 
- 
+## ✅ MVP
 
-🤝 Associations étudiantes et communautés 
+- Authentification
+- Forum communautaire
+- Réponses
+- Logements
+- Emplois étudiants
+- Groupes de révision
+- Associations étudiantes
 
-Découverte des associations étudiantes 
+---
 
-Informations sur les groupes communautaires 
+## 🔄 V2
 
-Accès aux dahiras étudiants 
+- Notifications
+- Favoris
+- Upload d'images
+- Messagerie privée
 
-Contacts et informations utiles 
+---
 
- 
+## 🔮 V3
 
-📖 Ressources utiles 
+- Application mobile
+- Intelligence artificielle
+- Recommandation personnalisée
+- Traduction automatique
 
-Guides administratifs 
+---
 
-Conseils pour les études 
+# 📸 Captures d'écran
 
-Informations importantes pour les étudiants internationaux 
+*À venir*
 
- 
+---
 
-🛠️ Stack technique 
+# ⚙️ Installation
 
-Backend 
+## Backend
 
-Java 
+```bash
+git clone https://github.com/ton-repo/terangalink.git
 
-Spring Boot 
+cd backend
 
-Spring Security 
+mvn clean install
 
-Spring Data JPA 
+mvn spring-boot:run
+```
 
-PostgreSQL 
+---
 
- 
+## Frontend
 
-Frontend 
+```bash
+cd frontend
 
-React 
+npm install
 
-Vite 
+npm run dev
+```
 
-Tailwind CSS 
+---
 
- 
+# 👨‍💻 Auteur
 
-Outils 
+**Talla Seck**
 
-Git / GitHub 
+Étudiant en Informatique
 
-Postman 
+Projet personnel développé dans le cadre de TerangaLink.
 
-Figma 
+---
 
-intellij
+# 📄 Licence
 
-
-
-
-
- 
-
-🏗️ Architecture du projet 
-
-Le projet suit une architecture REST moderne. 
-
-Backend 
-
-Controller 
-
-Service 
-
-Repository 
-
-Entity 
-
-DTO 
-
- 
-
-Frontend 
-
-Components 
-
-Pages 
-
-Services API 
-
- 
-
-🗄️ Base de données 
-
-Entités principales 
-
-User 
-
-Question 
-
-Answer 
-
-Category 
-
-Post 
-
-StudyGroup 
-
-HelpRequest 
-
-CommunityGroup 
-
- 
-
-🔐 Sécurité 
-
-Fonctionnalités prévues 
-
-Authentification sécurisée 
-
-Gestion des rôles utilisateurs 
-
-Protection des endpoints 
-
-JWT Authentication 
-
-#acompleter 
-
- 
-
-📱 Responsive Design 
-
-La plateforme adopte une approche responsive, permettant une utilisation fluide aussi bien sur smartphone que sur ordinateur.
-
-#acompleter 
-
- 
-
-🚀 Roadmap 
-
-✅ V1 
-
-Authentification 
-
-Questions/réponses 
-
-Catégories 
-
-Recherche 
-
-Annonces 
-
-Groupes de révision 
-
- 
-
-🔄 V2 
-
-Notifications 
-
-Upload de fichiers 
-
-Chat communautaire 
-
-Vérification des profils 
-
- 
-
-🔮 V3 
-
-Application mobile 
-
-Intelligence artificielle 
-
-Recommandation automatique de contenus 
-
- 
-
-📸 Captures d’écran 
-
-#acompleter 
-
- 
-
-🌍 Vision du projet 
-
-TerangaLink ne cherche pas uniquement à être un forum étudiant, mais une véritable plateforme d’intégration et d’entraide pour les étudiants internationaux. 
-
-Le projet vise à réduire l’isolement, améliorer l’accès à l’information et favoriser la réussite académique grâce à la solidarité étudiante. 
-
- 
-
-⚙️ Installation du projet 
-
-Backend 
-
-#acompleter 
-  
-
- 
-
-Frontend 
-
-#acompleter 
-  
-
- 
-
-👨‍💻 Auteur 
-
-#acompleter 
-
- 
-
-📄 Licence 
-
-#acompleter 
+Ce projet est distribué sous licence MIT.
