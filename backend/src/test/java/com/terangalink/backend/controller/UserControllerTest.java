@@ -21,7 +21,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -220,6 +223,25 @@ class UserControllerTest {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("INVALID_PATCH_REQUEST"));
+    }
+
+    @Test
+    void uploadProfilePhoto_shouldReturn200() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "photo.jpg",
+                "image/jpeg",
+                "image-data".getBytes());
+        UserResponseDTO response = UserTestFixtures.sampleUserResponse(1L);
+        response.setProfileImageUrl("https://example.com/photo.jpg");
+
+        when(userService.uploadProfileImage(eq(1L), any(MultipartFile.class))).thenReturn(response);
+
+        mockMvc.perform(multipart("/api/users/1/profile-photo")
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.profileImageUrl").value("https://example.com/photo.jpg"));
     }
 
     @Test

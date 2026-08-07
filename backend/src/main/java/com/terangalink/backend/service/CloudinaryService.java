@@ -12,6 +12,7 @@ import java.util.Map;
 public class CloudinaryService {
 
     private static final String HOUSING_FOLDER = "terangalink/housings";
+    private static final String USER_PROFILE_FOLDER = "terangalink/users";
 
     private final Cloudinary cloudinary;
 
@@ -20,10 +21,18 @@ public class CloudinaryService {
     }
 
     public UploadResult uploadImage(MultipartFile file) {
+        return uploadImage(file, HOUSING_FOLDER);
+    }
+
+    public UploadResult uploadProfileImage(MultipartFile file) {
+        return uploadImage(file, USER_PROFILE_FOLDER);
+    }
+
+    public UploadResult uploadImage(MultipartFile file, String folder) {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("folder", HOUSING_FOLDER, "resource_type", "image")
+                    ObjectUtils.asMap("folder", folder, "resource_type", "image")
             );
             return new UploadResult(
                     String.valueOf(result.get("public_id")),

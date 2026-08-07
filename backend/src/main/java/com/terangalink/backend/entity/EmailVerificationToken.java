@@ -26,12 +26,15 @@ public class EmailVerificationToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 36)
+    @Column(nullable = false, unique = true, length = 6)
     private String token;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(length = 255)
+    private String pendingEmail;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;

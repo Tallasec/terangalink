@@ -6,42 +6,51 @@ import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
 import com.terangalink.backend.exception.business.InvalidUserPatchException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import com.terangalink.backend.mapper.UserMapper;
+import com.terangalink.backend.repository.UserRepository;
 import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
 import com.terangalink.backend.requestDTO.UpdateUserRequestDTO;
-import com.terangalink.backend.repository.UserRepository;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
-@Transactional(readOnly = true) // Pour dire par défaut toutes les méthodes de cette classe sont dans une transaction en lecture seule.
-// Sauf les méthodes qui ont ça @Transactional
-// C'est pour la performance
+@Transactional(readOnly = true)
 public class UserService {
+
+    private static final long MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailNormalizer emailNormalizer;
+    private final EmailVerificationService emailVerificationService;
+    private final CloudinaryService cloudinaryService;
 
     public UserService(
             UserRepository userRepository,
             UserMapper userMapper,
             PasswordEncoder passwordEncoder,
-            EmailNormalizer emailNormalizer) {
+            EmailNormalizer emailNormalizer,
+            EmailVerificationService emailVerificationService,
+            CloudinaryService cloudinaryService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.emailNormalizer = emailNormalizer;
+        this.emailVerificationService = emailVerificationService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Transactional
-    // pour creer un user
     public UserResponseDTO createUser(CreateUserRequestDTO request) {
         String normalizedEmail = emailNormalizer.normalize(request.getEmail());
         request.setEmail(normalizedEmail);
@@ -59,13 +68,11 @@ public class UserService {
         return userMapper.toResponseDto(savedUser);
     }
 
-    // pour récupérer tous les users
     public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(Objects.requireNonNull(pageable)) //Vérifie que pageable n'est pas null sinon leve NullPointerException
-                .map(userMapper::toResponseDto); // Pour chaque User, appelle toResponseDto(User)
+        return userRepository.findAll(Objects.requireNonNull(pageable))
+                .map(userMapper::toResponseDto);
     }
 
-    // pour récupérer un user par son id
     public UserResponseDTO getUserById(Long id) {
         return userMapper.toResponseDto(findUserByIdOrThrow(id));
     }
@@ -73,16 +80,24 @@ public class UserService {
     @Transactional
     public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO request) {
         User user = findUserByIdOrThrow(id);
-        validatePatchPayload(request); // pour ne pas accepter un request null (tous les champs vides)
-        normalizeAndValidateIncomingEmail(request); //pour exiger l'adresse email
-        validateEmailUniquenessForUpdate(request.getEmail(), user.getId()); // pour éviter d'utiliser un email qui existee deja
+        validatePatchPayload(request);
+
+        String currentEmail = user.getEmail();
+        String normalizedEmail = normalizeAndValidateIncomingEmail(request);
+        boolean emailChanged = normalizedEmail != null && !normalizedEmail.equalsIgnoreCase(currentEmail);
+        validateEmailUniquenessForUpdate(normalizedEmail, user.getId());
 
         userMapper.updateEntityFromDto(request, user);
+
+        if (emailChanged) {
+            user.setEmail(currentEmail);
+            emailVerificationService.issueEmailChangeVerificationCode(user, normalizedEmail);
+        }
+
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        // Le role n'est pas modifiable via les endpoints publics user.
         if (user.getRole() == null) {
             user.setRole(Role.USER);
         }
@@ -90,6 +105,29 @@ public class UserService {
         return userMapper.toResponseDto(userRepository.save(user));
     }
 
+    @Transactional
+    public UserResponseDTO uploadProfileImage(Long id, MultipartFile file) {
+        User user = findUserByIdOrThrow(id);
+        validateProfileImage(file);
+
+        String previousPublicId = user.getProfileImagePublicId();
+        CloudinaryService.UploadResult uploadResult = cloudinaryService.uploadProfileImage(file);
+
+        user.setProfileImagePublicId(uploadResult.publicId());
+        user.setProfileImageUrl(uploadResult.imageUrl());
+
+        User savedUser = userRepository.save(user);
+
+        if (previousPublicId != null && !previousPublicId.isBlank()) {
+            try {
+                cloudinaryService.deleteImage(previousPublicId);
+            } catch (IllegalStateException ignored) {
+                // On conserve la nouvelle image même si la suppression Cloudinary échoue.
+            }
+        }
+
+        return userMapper.toResponseDto(savedUser);
+    }
 
     @Transactional
     public void deleteUser(Long id) {
@@ -115,18 +153,25 @@ public class UserService {
                         "Utilisateur introuvable avec l'id : " + id));
     }
 
-    private void normalizeAndValidateIncomingEmail(UpdateUserRequestDTO request) {
+    private String normalizeAndValidateIncomingEmail(UpdateUserRequestDTO request) {
+        if (request.getEmail() == null) {
+            return null;
+        }
+
         String normalizedEmail = emailNormalizer.normalize(request.getEmail());
-        if (request.getEmail() != null && (normalizedEmail == null || normalizedEmail.isBlank())) {
+        if (normalizedEmail == null || normalizedEmail.isBlank()) {
             throw new InvalidUserPatchException("L'email ne peut pas etre vide.");
         }
+
         request.setEmail(normalizedEmail);
+        return normalizedEmail;
     }
 
     private void validateEmailUniquenessForUpdate(String normalizedEmail, Long currentUserId) {
         if (normalizedEmail == null) {
             return;
         }
+
         if (userRepository.existsByEmailIgnoreCaseAndIdNot(normalizedEmail, currentUserId)) {
             throw new EmailAlreadyExistsException("Un utilisateur existe déjà avec cet email.");
         }
@@ -139,6 +184,30 @@ public class UserService {
         }
     }
 
+    private void validateProfileImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Le fichier image ne peut pas etre vide.");
+        }
+
+        if (file.getSize() > MAX_IMAGE_SIZE_BYTES) {
+            throw new IllegalArgumentException("La taille de l'image ne doit pas depasser 5 MB.");
+        }
+
+        String extension = extractExtension(file.getOriginalFilename());
+        if (!ALLOWED_IMAGE_EXTENSIONS.contains(extension)) {
+            throw new IllegalArgumentException(
+                    "Format d'image invalide. Formats autorises : jpg, jpeg, png, webp.");
+        }
+    }
+
+    private String extractExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+
+        return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+    }
+
     private boolean isPatchEmpty(UpdateUserRequestDTO request) {
         return request.getFirstName() == null
                 && request.getLastName() == null
@@ -148,6 +217,4 @@ public class UserService {
                 && request.getFieldOfStudy() == null
                 && request.getCity() == null;
     }
-
-
 }

@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Set;
@@ -77,6 +78,15 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody @Valid UpdateUserRequestDTO userRequestDTO) {
         UserResponseDTO updatedUser = userService.updateUser(id, userRequestDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PreAuthorize("@userSecurityService.canAccessUser(#id)")
+    @PostMapping(value = "/{id}/profile-photo", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponseDTO> uploadProfilePhoto(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        UserResponseDTO updatedUser = userService.uploadProfileImage(id, file);
         return ResponseEntity.ok(updatedUser);
     }
 

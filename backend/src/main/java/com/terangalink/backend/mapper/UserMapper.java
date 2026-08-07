@@ -47,6 +47,7 @@ public class UserMapper {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
+        dto.setProfileImageUrl(user.getProfileImageUrl());
         dto.setUniversity(user.getUniversity());
         dto.setFieldOfStudy(user.getFieldOfStudy());
         dto.setCity(user.getCity());

@@ -4,14 +4,17 @@ import com.terangalink.backend.requestDTO.ChangePasswordRequestDTO;
 import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
 import com.terangalink.backend.requestDTO.ForgotPasswordRequestDTO;
 import com.terangalink.backend.requestDTO.LoginRequestDTO;
+import com.terangalink.backend.requestDTO.ResendVerificationEmailRequestDTO;
 import com.terangalink.backend.requestDTO.ResetPasswordRequestDTO;
 import com.terangalink.backend.requestDTO.VerifyEmailRequestDTO;
 import com.terangalink.backend.responseDTO.AuthResponseDTO;
+import com.terangalink.backend.responseDTO.MessageResponseDTO;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
 import com.terangalink.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     private final AuthService authService;
@@ -31,8 +35,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(@RequestBody @Valid CreateUserRequestDTO request) {
-        AuthResponseDTO response = authService.register(request);
+    public ResponseEntity<MessageResponseDTO> register(@RequestBody @Valid CreateUserRequestDTO request) {
+        MessageResponseDTO response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -64,9 +68,15 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/verify-email")
-    public ResponseEntity<Void> verifyEmail(@ModelAttribute @Valid VerifyEmailRequestDTO request) {
+    @PostMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmailPost(@RequestBody @Valid VerifyEmailRequestDTO request) {
         authService.verifyEmail(request);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<MessageResponseDTO> resendVerificationEmail(
+            @RequestBody @Valid ResendVerificationEmailRequestDTO request) {
+        return ResponseEntity.ok(authService.resendVerificationEmail(request));
     }
 }

@@ -51,6 +51,12 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
+    @Column(length = 255)
+    private String profileImagePublicId;
+
+    @Column(length = 500)
+    private String profileImageUrl;
+
     // Verification email
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean emailVerified = false;

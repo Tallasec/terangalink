@@ -1,6 +1,7 @@
 package com.terangalink.backend.requestDTO;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.Setter;
 public class VerifyEmailRequestDTO {
 
     @NotBlank(message = "Le token de verification email est obligatoire.")
-    @Size(max = 36, message = "Le token de verification email ne doit pas depasser 36 caracteres.")
+    @Size(min = 6, max = 6, message = "Le token de verification email doit contenir 6 caracteres.")
+    @Pattern(regexp = "^\\d{6}$", message = "Le token de verification email doit contenir 6 chiffres.")
     private String token;
 }

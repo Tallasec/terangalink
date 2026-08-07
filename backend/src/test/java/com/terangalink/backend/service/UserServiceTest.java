@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +56,12 @@ class UserServiceTest {
 
     @Mock
     private EmailNormalizer emailNormalizer;
+
+    @Mock
+    private EmailVerificationService emailVerificationService;
+
+    @Mock
+    private CloudinaryService cloudinaryService;
 
     @InjectMocks
     private UserService userService;
@@ -168,6 +175,58 @@ class UserServiceTest {
         assertThat(userService.updateUser(1L, request)).isEqualTo(response);
         verify(userMapper).updateEntityFromDto(request, existingUser);
         verify(passwordEncoder, never()).encode(any());
+    }
+
+    @Test
+    void updateUser_shouldSendVerificationWhenEmailChanges() {
+        UpdateUserRequestDTO request = UserTestFixtures.validUpdateRequest();
+        request.setEmail("new@example.com");
+        User existingUser = UserTestFixtures.sampleUser(1L);
+        User savedUser = UserTestFixtures.sampleUser(1L);
+        UserResponseDTO response = UserTestFixtures.sampleUserResponse(1L);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(emailNormalizer.normalize("new@example.com")).thenReturn("new@example.com");
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot("new@example.com", 1L)).thenReturn(false);
+        when(userRepository.save(existingUser)).thenReturn(savedUser);
+        when(userMapper.toResponseDto(savedUser)).thenReturn(response);
+
+        userService.updateUser(1L, request);
+
+        assertThat(existingUser.getEmail()).isEqualTo(UserTestFixtures.NORMALIZED_EMAIL);
+        verify(emailVerificationService).issueEmailChangeVerificationCode(existingUser, "new@example.com");
+    }
+
+    @Test
+    void uploadProfileImage_shouldStoreUrlAndDeletePreviousImage() {
+        User existingUser = UserTestFixtures.sampleUser(1L);
+        existingUser.setProfileImagePublicId("users/old-photo");
+        existingUser.setProfileImageUrl("https://old.example.com/photo.jpg");
+        User savedUser = UserTestFixtures.sampleUser(1L);
+        savedUser.setProfileImagePublicId("users/new-photo");
+        savedUser.setProfileImageUrl("https://new.example.com/photo.jpg");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "photo.jpg",
+                "image/jpeg",
+                "image-data".getBytes());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(cloudinaryService.uploadProfileImage(file))
+                .thenReturn(new CloudinaryService.UploadResult(
+                        "users/new-photo",
+                        "https://new.example.com/photo.jpg"));
+        when(userRepository.save(existingUser)).thenReturn(savedUser);
+        UserResponseDTO response = UserTestFixtures.sampleUserResponse(1L);
+        response.setProfileImageUrl("https://new.example.com/photo.jpg");
+        when(userMapper.toResponseDto(savedUser)).thenReturn(response);
+
+        UserResponseDTO result = userService.uploadProfileImage(1L, file);
+
+        assertThat(result.getProfileImageUrl()).isEqualTo("https://new.example.com/photo.jpg");
+        assertThat(existingUser.getProfileImagePublicId()).isEqualTo("users/new-photo");
+        assertThat(existingUser.getProfileImageUrl()).isEqualTo("https://new.example.com/photo.jpg");
+        verify(cloudinaryService).deleteImage("users/old-photo");
     }
 
     @Test

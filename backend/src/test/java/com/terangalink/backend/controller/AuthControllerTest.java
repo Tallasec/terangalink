@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.terangalink.backend.exception.GlobalExceptionHandler;
 import com.terangalink.backend.exception.business.EmailAlreadyExistsException;
 import com.terangalink.backend.exception.business.EmailNotVerifiedException;
+import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
 import com.terangalink.backend.exception.business.ExpiredPasswordResetTokenException;
 import com.terangalink.backend.exception.business.InvalidCurrentPasswordException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
-import com.terangalink.backend.exception.business.ExpiredEmailVerificationTokenException;
+import com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException;
 import com.terangalink.backend.exception.business.InvalidPasswordResetTokenException;
 import com.terangalink.backend.exception.business.SamePasswordException;
 import com.terangalink.backend.requestDTO.ChangePasswordRequestDTO;
@@ -15,13 +16,13 @@ import com.terangalink.backend.requestDTO.CreateUserRequestDTO;
 import com.terangalink.backend.requestDTO.ForgotPasswordRequestDTO;
 import com.terangalink.backend.requestDTO.LoginRequestDTO;
 import com.terangalink.backend.requestDTO.ResetPasswordRequestDTO;
+import com.terangalink.backend.requestDTO.VerifyEmailRequestDTO;
 import com.terangalink.backend.responseDTO.AuthResponseDTO;
+import com.terangalink.backend.responseDTO.MessageResponseDTO;
 import com.terangalink.backend.responseDTO.UserResponseDTO;
-import com.terangalink.backend.service.AuthService;
 import com.terangalink.backend.security.CustomUserDetailsService;
 import com.terangalink.backend.security.JwtService;
-import com.terangalink.backend.support.AuthTestFixtures;
-import com.terangalink.backend.support.UserTestFixtures;
+import com.terangalink.backend.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,9 +33,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -62,9 +63,10 @@ class AuthControllerTest {
     private CustomUserDetailsService customUserDetailsService;
 
     @Test
-    void register_shouldReturn201WithAuthResponse() throws Exception {
-        CreateUserRequestDTO request = UserTestFixtures.validCreateRequest();
-        AuthResponseDTO response = buildAuthResponse();
+    void register_shouldReturn201WithMessageResponse() throws Exception {
+        CreateUserRequestDTO request = validCreateRequest();
+        MessageResponseDTO response = new MessageResponseDTO();
+        response.setMessage("Compte cree avec succes. Verifiez votre adresse email.");
 
         when(authService.register(any(CreateUserRequestDTO.class))).thenReturn(response);
 
@@ -72,12 +74,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").value("jwt-token"))
-                .andExpect(jsonPath("$.tokenType").value("Bearer"))
-                .andExpect(jsonPath("$.expiresIn").value(86400))
-                .andExpect(jsonPath("$.user.id").value(1))
-                .andExpect(jsonPath("$.user.email").value(UserTestFixtures.NORMALIZED_EMAIL))
-                .andExpect(jsonPath("$.user.password").doesNotExist());
+                .andExpect(jsonPath("$.message").value("Compte cree avec succes. Verifiez votre adresse email."));
     }
 
     @Test
@@ -91,10 +88,10 @@ class AuthControllerTest {
 
     @Test
     void register_shouldReturn409WhenEmailAlreadyExists() throws Exception {
-        CreateUserRequestDTO request = UserTestFixtures.validCreateRequest();
+        CreateUserRequestDTO request = validCreateRequest();
 
         when(authService.register(any(CreateUserRequestDTO.class)))
-                .thenThrow(new EmailAlreadyExistsException("Un utilisateur existe déjà avec cet email."));
+                .thenThrow(new EmailAlreadyExistsException("Un utilisateur existe deja avec cet email."));
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +102,7 @@ class AuthControllerTest {
 
     @Test
     void login_shouldReturn200WithAuthResponse() throws Exception {
-        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+        LoginRequestDTO request = validLoginRequest();
 
         when(authService.login(any(LoginRequestDTO.class))).thenReturn(buildAuthResponse());
 
@@ -128,7 +125,7 @@ class AuthControllerTest {
 
     @Test
     void login_shouldReturn401WhenCredentialsAreInvalid() throws Exception {
-        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+        LoginRequestDTO request = validLoginRequest();
 
         when(authService.login(any(LoginRequestDTO.class)))
                 .thenThrow(new InvalidCredentialsException("Identifiants invalides."));
@@ -142,11 +139,10 @@ class AuthControllerTest {
 
     @Test
     void login_shouldReturn403WhenEmailIsNotVerified() throws Exception {
-        LoginRequestDTO request = AuthTestFixtures.validLoginRequest();
+        LoginRequestDTO request = validLoginRequest();
 
         when(authService.login(any(LoginRequestDTO.class)))
-                .thenThrow(new EmailNotVerifiedException(
-                        "Veuillez vérifier votre adresse email avant de vous connecter."));
+                .thenThrow(new EmailNotVerifiedException("Veuillez verifier votre adresse email avant de vous connecter."));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,14 +153,14 @@ class AuthControllerTest {
 
     @Test
     void getCurrentUser_shouldReturn200WithProfile() throws Exception {
-        UserResponseDTO user = UserTestFixtures.sampleUserResponse(1L);
+        UserResponseDTO user = sampleUserResponse();
 
         when(authService.getCurrentUser()).thenReturn(user);
 
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.email").value(UserTestFixtures.NORMALIZED_EMAIL));
+                .andExpect(jsonPath("$.email").value("alice@example.com"));
     }
 
     @Test
@@ -194,7 +190,7 @@ class AuthControllerTest {
     @Test
     void changePassword_shouldReturn401WhenCurrentPasswordIsInvalid() throws Exception {
         ChangePasswordRequestDTO request = changePasswordRequest();
-        org.mockito.Mockito.doThrow(new InvalidCurrentPasswordException("Le mot de passe actuel est incorrect."))
+        doThrow(new InvalidCurrentPasswordException("Le mot de passe actuel est incorrect."))
                 .when(authService).changePassword(any(ChangePasswordRequestDTO.class));
 
         mockMvc.perform(patch("/api/auth/change-password")
@@ -207,7 +203,7 @@ class AuthControllerTest {
     @Test
     void changePassword_shouldReturn400WhenPasswordIsUnchanged() throws Exception {
         ChangePasswordRequestDTO request = changePasswordRequest();
-        org.mockito.Mockito.doThrow(new SamePasswordException("Le nouveau mot de passe doit etre different."))
+        doThrow(new SamePasswordException("Le nouveau mot de passe doit etre different."))
                 .when(authService).changePassword(any(ChangePasswordRequestDTO.class));
 
         mockMvc.perform(patch("/api/auth/change-password")
@@ -302,30 +298,43 @@ class AuthControllerTest {
 
     @Test
     void verifyEmail_shouldReturn204() throws Exception {
-        mockMvc.perform(get("/api/auth/verify-email")
-                        .param("token", "550e8400-e29b-41d4-a716-446655440000"))
+        VerifyEmailRequestDTO request = new VerifyEmailRequestDTO();
+        request.setToken("123456");
+
+        doNothing().when(authService).verifyEmail(any(VerifyEmailRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/verify-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     void verifyEmail_shouldReturn400WhenTokenIsInvalid() throws Exception {
-        doThrow(new com.terangalink.backend.exception.business.InvalidEmailVerificationTokenException(
-                "Le token de verification email est invalide."))
-                .when(authService).verifyEmail(any(com.terangalink.backend.requestDTO.VerifyEmailRequestDTO.class));
+        VerifyEmailRequestDTO request = new VerifyEmailRequestDTO();
+        request.setToken("123456");
 
-        mockMvc.perform(get("/api/auth/verify-email")
-                        .param("token", "invalid-token"))
+        doThrow(new InvalidEmailVerificationTokenException("Le token de verification email est invalide."))
+                .when(authService).verifyEmail(any(VerifyEmailRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/verify-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("INVALID_EMAIL_VERIFICATION_TOKEN"));
     }
 
     @Test
     void verifyEmail_shouldReturn400WhenTokenIsExpired() throws Exception {
-        doThrow(new ExpiredEmailVerificationTokenException("Le token de verification email a expire."))
-                .when(authService).verifyEmail(any(com.terangalink.backend.requestDTO.VerifyEmailRequestDTO.class));
+        VerifyEmailRequestDTO request = new VerifyEmailRequestDTO();
+        request.setToken("123456");
 
-        mockMvc.perform(get("/api/auth/verify-email")
-                        .param("token", "550e8400-e29b-41d4-a716-446655440000"))
+        doThrow(new ExpiredEmailVerificationTokenException("Le token de verification email a expire."))
+                .when(authService).verifyEmail(any(VerifyEmailRequestDTO.class));
+
+        mockMvc.perform(post("/api/auth/verify-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("EXPIRED_EMAIL_VERIFICATION_TOKEN"));
     }
@@ -355,7 +364,38 @@ class AuthControllerTest {
         response.setAccessToken("jwt-token");
         response.setTokenType("Bearer");
         response.setExpiresIn(86_400L);
-        response.setUser(UserTestFixtures.sampleUserResponse(1L));
+        response.setUser(sampleUserResponse());
         return response;
+    }
+
+    private CreateUserRequestDTO validCreateRequest() {
+        CreateUserRequestDTO request = new CreateUserRequestDTO();
+        request.setFirstName("Alice");
+        request.setLastName("Dupont");
+        request.setEmail("alice@example.com");
+        request.setPassword("Password1!");
+        request.setUniversity("Sorbonne");
+        request.setFieldOfStudy("Informatique");
+        request.setCity("Paris");
+        return request;
+    }
+
+    private LoginRequestDTO validLoginRequest() {
+        LoginRequestDTO request = new LoginRequestDTO();
+        request.setEmail("alice@example.com");
+        request.setPassword("Password1!");
+        return request;
+    }
+
+    private UserResponseDTO sampleUserResponse() {
+        UserResponseDTO user = new UserResponseDTO();
+        user.setId(1L);
+        user.setFirstName("Alice");
+        user.setLastName("Dupont");
+        user.setEmail("alice@example.com");
+        user.setUniversity("Sorbonne");
+        user.setFieldOfStudy("Informatique");
+        user.setCity("Paris");
+        return user;
     }
 }

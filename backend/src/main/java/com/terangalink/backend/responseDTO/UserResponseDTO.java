@@ -16,6 +16,7 @@ public class UserResponseDTO {
     private String firstName;
     private String lastName;
     private String email;
+    private String profileImageUrl;
     private String university;
     private String fieldOfStudy;
     private String city;
