@@ -111,6 +111,48 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(HousingNotAvailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleHousingNotAvailable(
+            HousingNotAvailableException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "HOUSING_NOT_AVAILABLE",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(HousingReservationNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleHousingReservationNotFound(
+            HousingReservationNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "HOUSING_RESERVATION_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidHousingReservationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidHousingReservation(
+            InvalidHousingReservationException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_HOUSING_RESERVATION",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
     @ExceptionHandler(HousingImageNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleHousingImageNotFound(
             HousingImageNotFoundException ex,

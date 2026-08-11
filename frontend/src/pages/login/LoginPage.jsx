@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { getAuthErrorMessage, loginUser } from "../../services/auth/authService";
 import { setAccessToken } from "../../services/auth/authStorage";
@@ -11,13 +11,19 @@ import Logo from "../../components/common/Logo";
 import Input from "../../components/common/ui/Input";
 import Button from "../../components/common/ui/Button";
 
+const SESSION_EXPIRED_MESSAGE = "Votre session a expiré. Veuillez vous reconnecter.";
+
 function LoginPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [message, setMessage] = useState(location.state?.message || "");
+    const [message, setMessage] = useState(
+        location.state?.message ||
+            (searchParams.get("session") === "expired" ? SESSION_EXPIRED_MESSAGE : ""),
+    );
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import MaterialSymbol from "../common/MaterialSymbol";
 import DashboardUserMenu from "./DashboardUserMenu";
 import { dashboardNavigationItems } from "../../services/dashboard/dashboardService";
 
-function DashboardHeader({ user }) {
+function DashboardHeader({ user, activeNav = "" }) {
     const [isElevated, setIsElevated] = useState(false);
 
     useEffect(() => {
@@ -27,20 +28,31 @@ function DashboardHeader({ user }) {
             }`}
         >
             <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-4 py-4 md:px-12">
-                <div className="text-[24px] font-bold leading-8 tracking-[-0.01em] text-[#00343a]">
+                <Link
+                    className="text-[24px] font-bold leading-8 tracking-[-0.01em] text-[#00343a]"
+                    to="/dashboard"
+                >
                     TerangaLink
-                </div>
+                </Link>
 
                 <nav className="hidden items-center gap-8 md:flex">
-                    {dashboardNavigationItems.map((item) => (
-                        <a
-                            key={item.label}
-                            className="text-[12px] font-semibold leading-4 tracking-[0.05em] text-[#40484a] transition-colors duration-200 hover:text-[#00343a]"
-                            href={item.href}
-                        >
-                            {item.label}
-                        </a>
-                    ))}
+                    {dashboardNavigationItems.map((item) => {
+                        const isActive = activeNav === item.label;
+
+                        return (
+                            <Link
+                                key={item.label}
+                                className={`text-[12px] font-semibold leading-4 tracking-[0.05em] transition-colors duration-200 ${
+                                    isActive
+                                        ? "border-b-2 border-[#00343a] pb-1 text-[#00343a]"
+                                        : "text-[#40484a] hover:text-[#00343a]"
+                                }`}
+                                to={item.href}
+                            >
+                                {item.label}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 <div className="flex items-center gap-4">

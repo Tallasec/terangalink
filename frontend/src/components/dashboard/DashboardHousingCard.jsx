@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import DashboardCard from "./DashboardCard";
 
 import { dashboardQuickAccessCards } from "../../services/dashboard/dashboardService";
@@ -7,8 +9,8 @@ function DashboardHousingCard() {
 
     return (
         <DashboardCard
-            as="a"
-            href="#"
+            as={Link}
+            to="/housing"
             className="group relative h-64 overflow-hidden rounded-xl border border-[#bfc8ca]/30 bg-white hover:-translate-y-1 md:col-span-8 md:h-auto"
         >
             <img

@@ -6,18 +6,39 @@ import RegisterPage from "./pages/register/RegisterPage";
 import VerifyEmailPage from "./pages/register/VerifyEmailPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
+import HousingPage from "./pages/housing/HousingPage";
+import HousingDetailPage from "./pages/housing/HousingDetailPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import GuestRoute from "./components/common/GuestRoute";
+import AuthSessionWatcher from "./components/common/AuthSessionWatcher";
 
 function App() {
     return (
-        <Routes>
+        <>
+            <AuthSessionWatcher />
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route
                 path="/dashboard"
                 element={
                     <ProtectedRoute>
                         <DashboardPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/housing"
+                element={
+                    <ProtectedRoute>
+                        <HousingPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/housing/:id"
+                element={
+                    <ProtectedRoute>
+                        <HousingDetailPage />
                     </ProtectedRoute>
                 }
             />
@@ -62,6 +83,7 @@ function App() {
                 }
             />
         </Routes>
+        </>
     );
 }
 

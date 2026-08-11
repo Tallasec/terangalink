@@ -12,7 +12,7 @@ import lombok.Setter;
  *   <li>{@code accessToken} — JWT signé émis par {@link com.terangalink.backend.security.JwtService}</li>
  *   <li>{@code tokenType} — toujours {@code "Bearer"}</li>
  *   <li>{@code expiresIn} — durée de validité en secondes (confort client)</li>
- *   <li>{@code user} — profil {@link UserResponseDTO} sans mot de passe,
+ *   <li>{@code user} — profil {@link UserResponseDTO} sans mots de passe,
  *       permettant l'affichage immédiat après register/login</li>
  * </ul>
  */

@@ -1,5 +1,9 @@
 import axios from "axios";
-import { clearAuthStorage, getAccessToken } from "./auth/authStorage";
+import {
+    getAccessToken,
+    handleSessionExpired,
+    isAccessTokenExpired,
+} from "./auth/authStorage";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
@@ -7,17 +11,27 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
     const requestConfig = config;
+
+    if (requestConfig.skipAuth) {
+        return requestConfig;
+    }
+
     const token = getAccessToken();
 
-    if (token && !requestConfig.skipAuth) {
-        requestConfig.headers = requestConfig.headers || {};
-        requestConfig.headers.Authorization = `Bearer ${token}`;
+    if (!token) {
+        return requestConfig;
     }
+
+    if (isAccessTokenExpired(token)) {
+        handleSessionExpired();
+        return Promise.reject(new Error("Session expired"));
+    }
+
+    requestConfig.headers = requestConfig.headers || {};
+    requestConfig.headers.Authorization = `Bearer ${token}`;
 
     return requestConfig;
 });
-
-let isRedirectingToLogin = false;
 
 api.interceptors.response.use(
     (response) => response,
@@ -28,12 +42,7 @@ api.interceptors.response.use(
             status === 401 && requestConfig && !requestConfig.skipAuth && requestConfig.headers?.Authorization;
 
         if (shouldHandleAuthError) {
-            clearAuthStorage();
-
-            if (!isRedirectingToLogin && window.location.pathname !== "/login") {
-                isRedirectingToLogin = true;
-                window.location.replace("/login");
-            }
+            handleSessionExpired();
         }
 
         return Promise.reject(error);

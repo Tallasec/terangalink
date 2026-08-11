@@ -8,6 +8,8 @@ export function getAccessToken() {
 
 export function setAccessToken(token) {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    isRedirectingToLogin = false;
+    window.dispatchEvent(new CustomEvent("auth-token-changed"));
 }
 
 export function clearAccessToken() {
@@ -52,6 +54,20 @@ export function isAccessTokenExpired(token = getAccessToken()) {
     return Date.now() >= payload.exp * 1000;
 }
 
+export function getAccessTokenExpiresAtMs(token = getAccessToken()) {
+    if (!token) {
+        return null;
+    }
+
+    const payload = decodeJwtPayload(token);
+
+    if (!payload || typeof payload.exp !== "number") {
+        return null;
+    }
+
+    return payload.exp * 1000;
+}
+
 export function hasValidAccessToken() {
     const token = getAccessToken();
     return Boolean(token) && !isAccessTokenExpired(token);
@@ -60,4 +76,20 @@ export function hasValidAccessToken() {
 export function clearAuthStorage() {
     clearAccessToken();
     sessionStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
+}
+
+let isRedirectingToLogin = false;
+
+export function handleSessionExpired() {
+    clearAuthStorage();
+
+    if (isRedirectingToLogin || window.location.pathname === "/login") {
+        return;
+    }
+
+    isRedirectingToLogin = true;
+
+    const loginUrl = new URL("/login", window.location.origin);
+    loginUrl.searchParams.set("session", "expired");
+    window.location.replace(`${loginUrl.pathname}${loginUrl.search}`);
 }

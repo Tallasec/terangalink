@@ -1,5 +1,5 @@
 export const dashboardNavigationItems = [
-    { label: "Logement", href: "#" },
+    { label: "Logement", href: "/housing" },
     { label: "Emplois", href: "#" },
     { label: "Groupes", href: "#" },
     { label: "Communauté", href: "#" },
