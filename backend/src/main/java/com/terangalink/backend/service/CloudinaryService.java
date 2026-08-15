@@ -13,6 +13,7 @@ public class CloudinaryService {
 
     private static final String HOUSING_FOLDER = "terangalink/housings";
     private static final String USER_PROFILE_FOLDER = "terangalink/users";
+    private static final String JOB_APPLICATION_CV_FOLDER = "terangalink/job-applications/cvs";
 
     private final Cloudinary cloudinary;
 
@@ -29,17 +30,29 @@ public class CloudinaryService {
     }
 
     public UploadResult uploadImage(MultipartFile file, String folder) {
+        return uploadFile(file, folder, "image");
+    }
+
+    public UploadResult uploadDocument(MultipartFile file, String folder) {
+        return uploadFile(file, folder, "auto");
+    }
+
+    public UploadResult uploadJobApplicationCv(MultipartFile file) {
+        return uploadDocument(file, JOB_APPLICATION_CV_FOLDER);
+    }
+
+    public UploadResult uploadFile(MultipartFile file, String folder, String resourceType) {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("folder", folder, "resource_type", "image")
+                    ObjectUtils.asMap("folder", folder, "resource_type", resourceType)
             );
             return new UploadResult(
                     String.valueOf(result.get("public_id")),
                     String.valueOf(result.get("secure_url"))
             );
         } catch (IOException ex) {
-            throw new IllegalStateException("Impossible d'uploader l'image sur Cloudinary.", ex);
+            throw new IllegalStateException("Impossible d'uploader le fichier sur Cloudinary.", ex);
         }
     }
 

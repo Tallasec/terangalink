@@ -46,6 +46,12 @@ public class StudyGroupResponseDTO {
 
     private String creatorLastName;
 
+    private long memberCount;
+
+    private boolean full;
+
+    private boolean currentUserMember;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

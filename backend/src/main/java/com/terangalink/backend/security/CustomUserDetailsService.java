@@ -22,4 +22,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Utilisateur introuvable avec l'email : " + email));
     }
+
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+        return userRepository.findById(id)
+                .map(UserPrincipal::from)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Utilisateur introuvable avec l'id : " + id));
+    }
 }

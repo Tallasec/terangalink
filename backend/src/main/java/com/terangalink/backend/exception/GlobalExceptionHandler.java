@@ -215,6 +215,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(JobApplicationNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleJobApplicationNotFound(
+            JobApplicationNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "JOB_APPLICATION_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(StudyGroupNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleStudyGroupNotFound(
             StudyGroupNotFoundException ex,
@@ -231,6 +246,66 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(StudyGroupMembershipAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleStudyGroupMembershipAlreadyExists(
+            StudyGroupMembershipAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "STUDY_GROUP_MEMBERSHIP_ALREADY_EXISTS",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(StudyGroupMembershipNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleStudyGroupMembershipNotFound(
+            StudyGroupMembershipNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "STUDY_GROUP_MEMBERSHIP_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(StudyGroupFullException.class)
+    public ResponseEntity<ApiErrorResponse> handleStudyGroupFull(
+            StudyGroupFullException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "STUDY_GROUP_FULL",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(StudyGroupClosedException.class)
+    public ResponseEntity<ApiErrorResponse> handleStudyGroupClosed(
+            StudyGroupClosedException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "STUDY_GROUP_CLOSED",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(AssociationNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleAssociationNotFound(
             AssociationNotFoundException ex,
@@ -245,6 +320,21 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidJobApplicationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidJobApplication(
+            InvalidJobApplicationException ex,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_JOB_APPLICATION",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)

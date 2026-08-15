@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
 STUDY GROUP ENTITY
@@ -72,6 +74,10 @@ public class StudyGroup {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
+
+    // Membres du groupe
+    @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudyGroupMember> members = new ArrayList<>();
 
     // Date de création
     @Column(nullable = false, updatable = false)

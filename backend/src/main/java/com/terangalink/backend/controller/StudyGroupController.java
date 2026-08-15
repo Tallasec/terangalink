@@ -3,6 +3,7 @@ package com.terangalink.backend.controller;
 import com.terangalink.backend.enums.MeetingType;
 import com.terangalink.backend.requestDTO.CreateStudyGroupRequestDTO;
 import com.terangalink.backend.requestDTO.UpdateStudyGroupRequestDTO;
+import com.terangalink.backend.responseDTO.StudyGroupMemberResponseDTO;
 import com.terangalink.backend.responseDTO.StudyGroupResponseDTO;
 import com.terangalink.backend.service.StudyGroupService;
 import jakarta.validation.Valid;
@@ -214,5 +215,32 @@ public class StudyGroupController {
         studyGroupService.deleteStudyGroup(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    // Rejoindre un groupe
+    @PostMapping("/{id}/join")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    public ResponseEntity<StudyGroupResponseDTO> joinStudyGroup(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(studyGroupService.joinStudyGroup(id));
+    }
+
+    // Quitter un groupe
+    @DeleteMapping("/{id}/leave")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    public ResponseEntity<StudyGroupResponseDTO> leaveStudyGroup(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(studyGroupService.leaveStudyGroup(id));
+    }
+
+    // Membres du groupe
+    @GetMapping("/{id}/members")
+    @PreAuthorize("@studyGroupSecurityService.canViewStudyGroupMembers(#id)")
+    public ResponseEntity<java.util.List<StudyGroupMemberResponseDTO>> getStudyGroupMembers(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(studyGroupService.getStudyGroupMembers(id));
     }
 }

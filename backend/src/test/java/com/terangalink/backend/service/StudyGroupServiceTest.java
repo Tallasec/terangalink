@@ -236,11 +236,9 @@ class StudyGroupServiceTest {
         dto.setSubject("Mathématiques");
         dto.setDescription("Séance de révision pour les examens.");
         dto.setCity("Dakar");
-        dto.setLocation("Bibliothèque");
         dto.setMeetingType(MeetingType.ONLINE);
         dto.setMeetingDate(LocalDateTime.of(2026, 8, 1, 10, 0));
         dto.setMaxMembers(8);
-        dto.setAvailable(true);
 
         return dto;
     }

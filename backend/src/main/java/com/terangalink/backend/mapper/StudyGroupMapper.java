@@ -25,14 +25,9 @@ public class StudyGroupMapper {
         studyGroup.setSubject(dto.getSubject());
         studyGroup.setDescription(dto.getDescription());
         studyGroup.setCity(dto.getCity());
-        studyGroup.setLocation(dto.getLocation());
         studyGroup.setMeetingType(dto.getMeetingType());
         studyGroup.setMeetingDate(dto.getMeetingDate());
         studyGroup.setMaxMembers(dto.getMaxMembers());
-
-        if (dto.getAvailable() != null) {
-            studyGroup.setAvailable(dto.getAvailable());
-        }
 
         return studyGroup;
     }

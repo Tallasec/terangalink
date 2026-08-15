@@ -1,7 +1,7 @@
 export const dashboardNavigationItems = [
     { label: "Logement", href: "/housing" },
-    { label: "Emplois", href: "#" },
-    { label: "Groupes", href: "#" },
+    { label: "Emplois", href: "/jobs" },
+    { label: "Groupes", href: "/study-groups" },
     { label: "Communauté", href: "#" },
 ];
 
@@ -19,6 +19,7 @@ export const dashboardQuickAccessCards = {
         description:
             "Parcourez des opportunités à temps partiel adaptées aux étudiants avec des horaires flexibles.",
         cta: "Explorer les postes",
+        href: "/jobs",
         icon: "work",
     },
     groups: {
@@ -27,6 +28,7 @@ export const dashboardQuickAccessCards = {
             "Connectez-vous avec des étudiants sénégalais dans votre domaine pour réviser ensemble.",
         cta: "Trouver des pairs",
         icon: "groups",
+        href: "/study-groups",
     },
 };
 

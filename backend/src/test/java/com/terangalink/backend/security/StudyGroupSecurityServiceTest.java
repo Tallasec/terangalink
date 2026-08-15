@@ -3,6 +3,7 @@ package com.terangalink.backend.security;
 import com.terangalink.backend.entity.StudyGroup;
 import com.terangalink.backend.entity.User;
 import com.terangalink.backend.enums.MeetingType;
+import com.terangalink.backend.repository.StudyGroupMemberRepository;
 import com.terangalink.backend.repository.StudyGroupRepository;
 import com.terangalink.backend.support.AuthTestFixtures;
 import com.terangalink.backend.support.UserTestFixtures;
@@ -30,6 +31,9 @@ class StudyGroupSecurityServiceTest {
 
     @Mock
     private StudyGroupRepository studyGroupRepository;
+
+    @Mock
+    private StudyGroupMemberRepository studyGroupMemberRepository;
 
     @InjectMocks
     private StudyGroupSecurityService studyGroupSecurityService;
@@ -131,6 +135,34 @@ class StudyGroupSecurityServiceTest {
 
         assertThat(studyGroupSecurityService.canAccessStudyGroup(null)).isFalse();
         verify(studyGroupRepository, never()).findById(null);
+    }
+
+    @Test
+    void canViewStudyGroupMembers_shouldAllowMember() {
+
+        UserPrincipal principal = AuthTestFixtures.sampleUserPrincipal(99L);
+        setAuthentication(principal);
+
+        when(studyGroupRepository.findById(10L))
+                .thenReturn(Optional.of(sampleStudyGroup(10L, false)));
+        when(studyGroupMemberRepository.existsByStudyGroupIdAndUserId(10L, 99L))
+                .thenReturn(true);
+
+        assertThat(studyGroupSecurityService.canViewStudyGroupMembers(10L)).isTrue();
+    }
+
+    @Test
+    void canViewStudyGroupMembers_shouldDenyNonMember() {
+
+        UserPrincipal principal = AuthTestFixtures.sampleUserPrincipal(99L);
+        setAuthentication(principal);
+
+        when(studyGroupRepository.findById(10L))
+                .thenReturn(Optional.of(sampleStudyGroup(10L, false)));
+        when(studyGroupMemberRepository.existsByStudyGroupIdAndUserId(10L, 99L))
+                .thenReturn(false);
+
+        assertThat(studyGroupSecurityService.canViewStudyGroupMembers(10L)).isFalse();
     }
 
     private void setAuthentication(UserPrincipal principal) {

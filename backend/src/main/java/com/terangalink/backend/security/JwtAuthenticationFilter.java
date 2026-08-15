@@ -45,8 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (jwtService.validateToken(token)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = jwtService.extractUsername(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // Prefer loading user by stable id extracted from token subject/claims.
+            Long userId = jwtService.extractUserId(token);
+            UserDetails userDetails = null;
+            if (userId != null) {
+                userDetails = userDetailsService.loadUserById(userId);
+            } else {
+                // Fallback for older tokens that used email as subject
+                String username = jwtService.extractUsername(token);
+                userDetails = userDetailsService.loadUserByUsername(username);
+            }
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,

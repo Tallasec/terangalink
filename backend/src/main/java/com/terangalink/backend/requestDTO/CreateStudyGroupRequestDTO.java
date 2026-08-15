@@ -47,10 +47,6 @@ public class CreateStudyGroupRequestDTO {
     @Size(max = 120, message = "La ville ne doit pas depasser 120 caracteres.")
     private String city;
 
-    // Lieu de rendez-vous
-    @Size(max = 255, message = "Le lieu ne doit pas depasser 255 caracteres.")
-    private String location;
-
     // Type de rencontre
     @NotNull(message = "Le type de rencontre est obligatoire.")
     private MeetingType meetingType;
@@ -64,7 +60,4 @@ public class CreateStudyGroupRequestDTO {
     @NotNull(message = "Le nombre maximum de participants est obligatoire.")
     @Min(value = 2, message = "Le nombre maximum de participants doit etre au moins 2.")
     private Integer maxMembers;
-
-    // Groupe disponible
-    private Boolean available;
 }

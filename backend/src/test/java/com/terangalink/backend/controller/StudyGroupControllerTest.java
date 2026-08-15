@@ -41,182 +41,177 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 class StudyGroupControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private StudyGroupService studyGroupService;
+        @MockBean
+        private StudyGroupService studyGroupService;
 
-    @MockBean
-    private JwtService jwtService;
+        @MockBean
+        private JwtService jwtService;
 
-    @MockBean
-    private CustomUserDetailsService customUserDetailsService;
+        @MockBean
+        private CustomUserDetailsService customUserDetailsService;
 
-    @Test
-    void createStudyGroup_shouldReturn201WithLocationAndBody() throws Exception {
+        @Test
+        void createStudyGroup_shouldReturn201WithLocationAndBody() throws Exception {
 
-        CreateStudyGroupRequestDTO request = createRequest();
-        StudyGroupResponseDTO response = sampleResponse(10L);
+                CreateStudyGroupRequestDTO request = createRequest();
+                StudyGroupResponseDTO response = sampleResponse(10L);
 
-        when(studyGroupService.createStudyGroup(any(CreateStudyGroupRequestDTO.class)))
-                .thenReturn(response);
+                when(studyGroupService.createStudyGroup(any(CreateStudyGroupRequestDTO.class)))
+                                .thenReturn(response);
 
-        mockMvc.perform(post("/api/study-groups")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(header().string(
-                        "Location",
-                        containsString("/api/study-groups/10")))
-                .andExpect(jsonPath("$.id").value(10))
-                .andExpect(jsonPath("$.title").value("Révisions Java"))
-                .andExpect(jsonPath("$.meetingType").value("ONLINE"));
-    }
+                mockMvc.perform(post("/api/study-groups")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(header().string(
+                                                "Location",
+                                                containsString("/api/study-groups/10")))
+                                .andExpect(jsonPath("$.id").value(10))
+                                .andExpect(jsonPath("$.title").value("Révisions Java"))
+                                .andExpect(jsonPath("$.meetingType").value("ONLINE"));
+        }
 
-    @Test
-    void getStudyGroupById_shouldReturn200() throws Exception {
+        @Test
+        void getStudyGroupById_shouldReturn200() throws Exception {
 
-        when(studyGroupService.getStudyGroupById(10L))
-                .thenReturn(sampleResponse(10L));
+                when(studyGroupService.getStudyGroupById(10L))
+                                .thenReturn(sampleResponse(10L));
 
-        mockMvc.perform(get("/api/study-groups/10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(10))
-                .andExpect(jsonPath("$.available").value(true));
-    }
+                mockMvc.perform(get("/api/study-groups/10"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(10))
+                                .andExpect(jsonPath("$.available").value(true));
+        }
 
-    @Test
-    void getAllStudyGroups_shouldReturnPage() throws Exception {
+        @Test
+        void getAllStudyGroups_shouldReturnPage() throws Exception {
 
-        StudyGroupResponseDTO response = sampleResponse(10L);
+                StudyGroupResponseDTO response = sampleResponse(10L);
 
-        when(studyGroupService.getAllStudyGroups(any(PageRequest.class)))
-                .thenReturn(new PageImpl<>(
-                        List.of(response),
-                        PageRequest.of(0, 20),
-                        1));
+                when(studyGroupService.getAllStudyGroups(any(PageRequest.class)))
+                                .thenReturn(new PageImpl<>(
+                                                List.of(response),
+                                                PageRequest.of(0, 20),
+                                                1));
 
-        mockMvc.perform(get("/api/study-groups"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(10))
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.size").value(20));
-    }
+                mockMvc.perform(get("/api/study-groups"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content[0].id").value(10))
+                                .andExpect(jsonPath("$.totalElements").value(1))
+                                .andExpect(jsonPath("$.size").value(20));
+        }
 
-    @Test
-    void searchStudyGroups_shouldReturnPage() throws Exception {
+        @Test
+        void searchStudyGroups_shouldReturnPage() throws Exception {
 
-        StudyGroupResponseDTO response = sampleResponse(10L);
+                StudyGroupResponseDTO response = sampleResponse(10L);
 
-        when(studyGroupService.searchStudyGroups(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(PageRequest.class)))
-                .thenReturn(new PageImpl<>(
-                        List.of(response),
-                        PageRequest.of(0, 20),
-                        1));
+                when(studyGroupService.searchStudyGroups(
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(PageRequest.class)))
+                                .thenReturn(new PageImpl<>(
+                                                List.of(response),
+                                                PageRequest.of(0, 20),
+                                                1));
 
-        mockMvc.perform(get("/api/study-groups/search")
-                        .param("title", "Révisions")
-                        .param("subject", "Mathématiques")
-                        .param("city", "Dakar")
-                        .param("meetingType", "ONLINE")
-                        .param("available", "true")
-                        .param("meetingDate", "2026-08-01T10:00:00"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("Révisions Java"))
-                .andExpect(jsonPath("$.content[0].meetingType").value("ONLINE"));
-    }
+                mockMvc.perform(get("/api/study-groups/search")
+                                .param("title", "Révisions")
+                                .param("subject", "Mathématiques")
+                                .param("city", "Dakar")
+                                .param("meetingType", "ONLINE")
+                                .param("available", "true")
+                                .param("meetingDate", "2026-08-01T10:00:00"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content[0].title").value("Révisions Java"))
+                                .andExpect(jsonPath("$.content[0].meetingType").value("ONLINE"));
+        }
 
-    @Test
-    void updateStudyGroup_shouldReturn200() throws Exception {
+        @Test
+        void updateStudyGroup_shouldReturn200() throws Exception {
 
-        UpdateStudyGroupRequestDTO request = updateRequest();
-        StudyGroupResponseDTO response = sampleResponse(10L);
-        response.setTitle("Révisions Java Avancées");
+                UpdateStudyGroupRequestDTO request = updateRequest();
+                StudyGroupResponseDTO response = sampleResponse(10L);
+                response.setTitle("Révisions Java Avancées");
 
-        when(studyGroupService.updateStudyGroup(
-                eq(10L),
-                any(UpdateStudyGroupRequestDTO.class)))
-                .thenReturn(response);
+                when(studyGroupService.updateStudyGroup(
+                                eq(10L),
+                                any(UpdateStudyGroupRequestDTO.class)))
+                                .thenReturn(response);
 
-        mockMvc.perform(patch("/api/study-groups/10")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(10))
-                .andExpect(jsonPath("$.title").value("Révisions Java Avancées"));
-    }
+                mockMvc.perform(patch("/api/study-groups/10")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(10))
+                                .andExpect(jsonPath("$.title").value("Révisions Java Avancées"));
+        }
 
-    @Test
-    void deleteStudyGroup_shouldReturn204() throws Exception {
+        @Test
+        void deleteStudyGroup_shouldReturn204() throws Exception {
 
-        doNothing().when(studyGroupService)
-                .deleteStudyGroup(10L);
+                doNothing().when(studyGroupService)
+                                .deleteStudyGroup(10L);
 
-        mockMvc.perform(delete("/api/study-groups/10"))
-                .andExpect(status().isNoContent());
-    }
+                mockMvc.perform(delete("/api/study-groups/10"))
+                                .andExpect(status().isNoContent());
+        }
 
-    private CreateStudyGroupRequestDTO createRequest() {
+        private CreateStudyGroupRequestDTO createRequest() {
 
-        CreateStudyGroupRequestDTO dto =
-                new CreateStudyGroupRequestDTO();
+                CreateStudyGroupRequestDTO dto = new CreateStudyGroupRequestDTO();
 
-        dto.setTitle("Révisions Java");
-        dto.setSubject("Mathématiques");
-        dto.setDescription("Séance de révision pour les examens.");
-        dto.setCity("Dakar");
-        dto.setLocation("Bibliothèque");
-        dto.setMeetingType(MeetingType.ONLINE);
-        dto.setMeetingDate(LocalDateTime.of(2026, 8, 1, 10, 0));
-        dto.setMaxMembers(8);
-        dto.setAvailable(true);
+                dto.setTitle("Révisions Java");
+                dto.setSubject("Mathématiques");
+                dto.setDescription("Séance de révision pour les examens.");
+                dto.setCity("Dakar");
+                dto.setMeetingType(MeetingType.ONLINE);
+                dto.setMeetingDate(LocalDateTime.now().plusDays(1));
+                dto.setMaxMembers(8);
 
-        return dto;
-    }
+                return dto;
+        }
 
-    private UpdateStudyGroupRequestDTO updateRequest() {
+        private UpdateStudyGroupRequestDTO updateRequest() {
 
-        UpdateStudyGroupRequestDTO dto =
-                new UpdateStudyGroupRequestDTO();
+                UpdateStudyGroupRequestDTO dto = new UpdateStudyGroupRequestDTO();
 
-        dto.setTitle("Révisions Java Avancées");
-        dto.setMaxMembers(10);
+                dto.setTitle("Révisions Java Avancées");
+                dto.setMaxMembers(10);
 
-        return dto;
-    }
+                return dto;
+        }
 
-    private StudyGroupResponseDTO sampleResponse(Long id) {
+        private StudyGroupResponseDTO sampleResponse(Long id) {
 
-        StudyGroupResponseDTO dto =
-                new StudyGroupResponseDTO();
+                StudyGroupResponseDTO dto = new StudyGroupResponseDTO();
 
-        dto.setId(id);
-        dto.setTitle("Révisions Java");
-        dto.setSubject("Mathématiques");
-        dto.setDescription("Séance de révision pour les examens.");
-        dto.setCity("Dakar");
-        dto.setLocation("Bibliothèque");
-        dto.setMeetingType(MeetingType.ONLINE);
-        dto.setMeetingDate(LocalDateTime.of(2026, 8, 1, 10, 0));
-        dto.setMaxMembers(8);
-        dto.setAvailable(true);
-        dto.setCreatorId(1L);
-        dto.setCreatorFirstName("Alice");
-        dto.setCreatorLastName("Dupont");
-        dto.setCreatedAt(LocalDateTime.of(2025, 2, 1, 9, 0));
-        dto.setUpdatedAt(LocalDateTime.of(2025, 2, 1, 10, 0));
+                dto.setId(id);
+                dto.setTitle("Révisions Java");
+                dto.setSubject("Mathématiques");
+                dto.setDescription("Séance de révision pour les examens.");
+                dto.setCity("Dakar");
+                dto.setLocation("Bibliothèque");
+                dto.setMeetingType(MeetingType.ONLINE);
+                dto.setMeetingDate(LocalDateTime.of(2026, 8, 1, 10, 0));
+                dto.setMaxMembers(8);
+                dto.setAvailable(true);
+                dto.setCreatorId(1L);
+                dto.setCreatorFirstName("Alice");
+                dto.setCreatorLastName("Dupont");
+                dto.setCreatedAt(LocalDateTime.of(2025, 2, 1, 9, 0));
+                dto.setUpdatedAt(LocalDateTime.of(2025, 2, 1, 10, 0));
 
-        return dto;
-    }
+                return dto;
+        }
 }

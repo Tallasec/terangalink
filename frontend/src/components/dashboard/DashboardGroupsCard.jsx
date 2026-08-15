@@ -1,15 +1,17 @@
+import { Link } from "react-router-dom";
+
 import DashboardCard from "./DashboardCard";
 import MaterialSymbol from "../common/MaterialSymbol";
 
 import { dashboardQuickAccessCards } from "../../services/dashboard/dashboardService";
 
 function DashboardGroupsCard() {
-    const { title, description, cta } = dashboardQuickAccessCards.groups;
+    const { title, description, cta, href } = dashboardQuickAccessCards.groups;
 
     return (
         <DashboardCard
-            as="a"
-            href="#"
+            as={Link}
+            to={href}
             className="group flex flex-col justify-between rounded-xl border border-[#bfc8ca]/50 bg-white p-8 hover:-translate-y-1 md:col-span-4"
         >
             <div>

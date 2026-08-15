@@ -29,7 +29,10 @@ public class JwtService {
         Date expiry = new Date(now.getTime() + jwtProperties.getExpirationMs());
 
         var builder = Jwts.builder()
-                .subject(principal.getUsername())
+                // Use stable user id as subject so changing email won't break existing tokens
+                .subject(String.valueOf(principal.getId()))
+                // Keep email as a separate claim for compatibility and display purposes
+                .claim("email", principal.getUsername())
                 .claim("userId", principal.getId())
                 .claim("role", principal.getRole().name())
                 .issuedAt(now)
@@ -44,7 +47,36 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        // Prefer explicit "email" claim when present (new tokens include it),
+        // otherwise fall back to subject for backwards compatibility.
+        Claims claims = parseClaims(token);
+        String email = claims.get("email", String.class);
+        if (email != null && !email.isBlank()) {
+            return email;
+        }
+        return claims.getSubject();
+    }
+
+    public Long extractUserId(String token) {
+        Claims claims = parseClaims(token);
+        // Try explicit claim first
+        Object userIdClaim = claims.get("userId");
+        if (userIdClaim instanceof Number) {
+            return ((Number) userIdClaim).longValue();
+        }
+        if (userIdClaim instanceof String) {
+            try {
+                return Long.parseLong((String) userIdClaim);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        // Fallback: subject might be the numeric id (older or new tokens)
+        String subject = claims.getSubject();
+        try {
+            return Long.parseLong(subject);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
     public Date extractExpiration(String token) {

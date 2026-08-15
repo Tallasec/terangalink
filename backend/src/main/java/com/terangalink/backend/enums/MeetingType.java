@@ -13,6 +13,8 @@ public enum MeetingType {
 
     IN_PERSON,
 
-    HYBRID
+    HYBRID,
+
+    TEST
 
 }
