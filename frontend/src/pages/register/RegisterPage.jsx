@@ -111,7 +111,7 @@ function RegisterPage() {
                                             className="mt-0.5 text-[#fdd798]"
                                         />
                                         <p className="text-[16px] leading-[24px] text-white/90">
-                                            Rejoignez une communauté fondée sur la valeur
+                                            Rejoignez un espace fondé sur la valeur
                                             sénégalaise de la Teranga.
                                         </p>
                                     </div>

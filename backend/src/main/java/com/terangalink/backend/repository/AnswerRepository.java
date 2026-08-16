@@ -19,5 +19,7 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
 
     List<Answer> findByForumTopicIdAndDeletedFalseOrderByCreatedAtAsc(Long forumTopicId);
 
+    List<Answer> findByForumTopicIdAndDeletedFalse(Long forumTopicId);
+
     Optional<Answer> findByIdAndDeletedFalse(Long id);
 }

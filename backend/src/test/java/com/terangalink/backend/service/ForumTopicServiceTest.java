@@ -1,11 +1,14 @@
 package com.terangalink.backend.service;
 
+import com.terangalink.backend.entity.Answer;
 import com.terangalink.backend.entity.ForumTopic;
 import com.terangalink.backend.entity.User;
 import com.terangalink.backend.enums.ForumCategory;
 import com.terangalink.backend.exception.business.ForumNotFoundException;
 import com.terangalink.backend.mapper.ForumTopicMapper;
+import com.terangalink.backend.repository.AnswerRepository;
 import com.terangalink.backend.repository.ForumTopicRepository;
+import com.terangalink.backend.repository.ForumTopicViewRepository;
 import com.terangalink.backend.repository.UserRepository;
 import com.terangalink.backend.requestDTO.CreateForumTopicRequestDTO;
 import com.terangalink.backend.requestDTO.UpdateForumTopicRequestDTO;
@@ -39,6 +42,12 @@ class ForumTopicServiceTest {
 
     @Mock
     private ForumTopicRepository forumTopicRepository;
+
+    @Mock
+    private ForumTopicViewRepository forumTopicViewRepository;
+
+    @Mock
+    private AnswerRepository answerRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -102,6 +111,18 @@ class ForumTopicServiceTest {
         when(forumTopicRepository.findById(1L))
                 .thenReturn(Optional.of(forumTopic));
 
+        UserPrincipal principal = AuthTestFixtures.sampleUserPrincipal(1L);
+        setAuthentication(principal);
+
+        when(forumTopicViewRepository.existsByForumTopicIdAndUserId(1L, 1L))
+                .thenReturn(false);
+
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(author));
+
+        when(forumTopicViewRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
         when(forumTopicRepository.save(any()))
                 .thenReturn(forumTopic);
 
@@ -113,7 +134,34 @@ class ForumTopicServiceTest {
 
         assertThat(result.getId()).isEqualTo(1L);
 
+        verify(forumTopicViewRepository).save(any());
         verify(forumTopicRepository).save(any());
+    }
+
+    @Test
+    void getForumTopicById_shouldNotIncrementViewTwiceForSameUser() {
+
+        User author = UserTestFixtures.sampleUser(1L);
+        ForumTopic forumTopic = sampleForumTopic(1L, author);
+        ForumTopicResponseDTO response = sampleResponse(1L);
+        UserPrincipal principal = AuthTestFixtures.sampleUserPrincipal(1L);
+        setAuthentication(principal);
+
+        when(forumTopicRepository.findById(1L))
+                .thenReturn(Optional.of(forumTopic));
+        when(forumTopicViewRepository.existsByForumTopicIdAndUserId(1L, 1L))
+                .thenReturn(true);
+        when(forumTopicMapper.toResponseDto(forumTopic))
+                .thenReturn(response);
+
+        ForumTopicResponseDTO result =
+                forumTopicService.getForumTopicById(1L);
+        forumTopicService.getForumTopicById(1L);
+
+        assertThat(result.getId()).isEqualTo(1L);
+
+        verify(forumTopicViewRepository, never()).save(any());
+        verify(forumTopicRepository, never()).save(any());
     }
 
     @Test
@@ -225,9 +273,14 @@ class ForumTopicServiceTest {
         User author = UserTestFixtures.sampleUser(1L);
 
         ForumTopic forumTopic = sampleForumTopic(1L, author);
+        Answer answer = sampleAnswer(10L, forumTopic, author);
 
         when(forumTopicRepository.findById(1L))
                 .thenReturn(Optional.of(forumTopic));
+        when(answerRepository.findByForumTopicIdAndDeletedFalse(1L))
+                .thenReturn(List.of(answer));
+        when(answerRepository.saveAll(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         when(forumTopicRepository.save(any()))
                 .thenReturn(forumTopic);
@@ -235,8 +288,10 @@ class ForumTopicServiceTest {
         forumTopicService.deleteForumTopic(1L);
 
         assertThat(forumTopic.isDeleted()).isTrue();
+        assertThat(answer.isDeleted()).isTrue();
 
         verify(forumTopicRepository).save(forumTopic);
+        verify(answerRepository).saveAll(any());
     }
 
     private void setAuthentication(UserPrincipal principal) {
@@ -309,6 +364,25 @@ class ForumTopicServiceTest {
         dto.setUpdatedAt(LocalDateTime.now());
 
         return dto;
+    }
+
+    private Answer sampleAnswer(
+            Long id,
+            ForumTopic forumTopic,
+            User author
+    ) {
+
+        Answer answer = new Answer();
+
+        answer.setId(id);
+        answer.setContent("Réponse de test.");
+        answer.setForumTopic(forumTopic);
+        answer.setAuthor(author);
+        answer.setDeleted(false);
+        answer.setCreatedAt(LocalDateTime.now());
+        answer.setUpdatedAt(LocalDateTime.now());
+
+        return answer;
     }
 
 }

@@ -10,7 +10,7 @@ function HousingHeader({ onPublishClick }) {
                             Trouvez votre chez-vous en France
                         </h1>
                         <p className="mx-auto mt-3 max-w-2xl text-[16px] leading-6 text-[#40484a] md:mx-0">
-                            Des logements verifies par la communaute TerangaLink pour les etudiants
+                            Des logements verifies par TerangaLink pour les etudiants
                             senegalais.
                         </p>
                     </div>

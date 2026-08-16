@@ -10,7 +10,7 @@ function HeroSection() {
             <div className="mx-auto grid w-full max-w-[1200px] items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]">
                 <div className="z-10 py-12">
                     <span className="mb-6 inline-block rounded-full bg-[#fdd798] px-3 py-1 text-[12px] font-semibold leading-[16px] tracking-[0.05em] text-[#785c29]">
-                        Bienvenue dans la communauté
+                        Bienvenue sur TerangaLink
                     </span>
 
                     <h1 className="max-w-[540px] text-[36px] font-bold leading-[44px] tracking-[-0.02em] text-[#00343a] text-balance sm:text-[44px] sm:leading-[52px] lg:text-[48px] lg:leading-[56px]">
@@ -19,7 +19,7 @@ function HeroSection() {
 
                     <p className="mt-6 max-w-[540px] text-[16px] font-normal leading-[24px] text-[#40484a] sm:text-[18px] sm:leading-[28px]">
                         L&apos;hospitalité sénégalaise au service de votre avenir. Trouvez
-                        un logement, un job étudiant et une communauté soudée pour briller
+                        un logement, un job étudiant et un reseau solidaire pour briller
                         durant vos études.
                     </p>
 

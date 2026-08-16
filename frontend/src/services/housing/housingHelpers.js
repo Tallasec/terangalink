@@ -28,7 +28,7 @@ export const DEFAULT_HOUSING_FILTERS = {
     maxPrice: "",
     sort: "createdAt,desc",
     page: 0,
-    size: 12,
+    size: 8,
 };
 
 export const HOUSING_PLACEHOLDER_IMAGE =
