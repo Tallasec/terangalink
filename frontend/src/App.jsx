@@ -12,6 +12,13 @@ import JobsPage from "./pages/jobs/JobsPage";
 import JobDetailPage from "./pages/jobs/JobDetailPage";
 import StudyGroupsPage from "./pages/study-groups/StudyGroupsPage";
 import StudyGroupDetailPage from "./pages/study-groups/StudyGroupDetailPage";
+import AssociationsPage from "./pages/associations/AssociationsPage";
+import AssociationCreatePage from "./pages/associations/AssociationCreatePage";
+import AssociationDetailPage from "./pages/associations/AssociationDetailPage";
+import AssociationEditPage from "./pages/associations/AssociationEditPage";
+import ForumPage from "./pages/forum/ForumPage";
+import ForumTopicDetailPage from "./pages/forum/ForumTopicDetailPage";
+import ForumTopicCreatePage from "./pages/forum/ForumTopicCreatePage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import GuestRoute from "./components/common/GuestRoute";
 import AuthSessionWatcher from "./components/common/AuthSessionWatcher";
@@ -75,6 +82,62 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <StudyGroupDetailPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/associations"
+                    element={
+                        <ProtectedRoute>
+                            <AssociationsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/associations/create"
+                    element={
+                        <ProtectedRoute>
+                            <AssociationCreatePage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/associations/:id/edit"
+                    element={
+                        <ProtectedRoute>
+                            <AssociationEditPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/associations/:id"
+                    element={
+                        <ProtectedRoute>
+                            <AssociationDetailPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/forum"
+                    element={
+                        <ProtectedRoute>
+                            <ForumPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/forum/create"
+                    element={
+                        <ProtectedRoute>
+                            <ForumTopicCreatePage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/forum/:id"
+                    element={
+                        <ProtectedRoute>
+                            <ForumTopicDetailPage />
                         </ProtectedRoute>
                     }
                 />

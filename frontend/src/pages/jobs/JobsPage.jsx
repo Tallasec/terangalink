@@ -18,7 +18,7 @@ import { getCurrentUser } from "../../services/user/userService";
 
 const DEFAULT_JOB_FILTERS = {
     page: 0,
-    size: 12,
+    size: 8,
     sort: "createdAt,desc",
     title: "",
     city: "",

@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 const navLinks = [
     { href: "/housing", label: "Logement" },
     { href: "/jobs", label: "Emplois" },
+    { href: "/associations", label: "Associations" },
     { href: "#groups", label: "Groupes" },
-    { href: "#community", label: "Communauté" },
+    { href: "/forum", label: "Forum" },
 ];
 
 function LandingNavLinks() {

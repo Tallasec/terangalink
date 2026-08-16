@@ -48,7 +48,7 @@ function HowItWorksSection() {
                                         Réussissez ensemble
                                     </h3>
                                     <p className="mt-2 max-w-lg text-[16px] font-normal leading-[24px] text-[#40484a]">
-                                        Accédez à un support communautaire 24/7 et à des conseils
+                                        Accédez à un support continu 24/7 et à des conseils
                                         administratifs.
                                     </p>
                                 </div>

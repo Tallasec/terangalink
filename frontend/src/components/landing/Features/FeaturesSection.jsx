@@ -28,7 +28,7 @@ function FeaturesSection() {
                                     Logements sûrs
                                 </h3>
                                 <p className="mb-6 text-[15px] font-normal leading-[23px] text-[#40484a] sm:text-[16px] sm:leading-[24px]">
-                                    Accédez à des offres vérifiées par la communauté, de la
+                                    Accédez à des offres vérifiées par TerangaLink, de la
                                     chambre chez l&apos;habitant à la colocation entre étudiants.
                                 </p>
                                 <ul className="space-y-3">
@@ -111,7 +111,7 @@ function FeaturesSection() {
                     </div>
 
                     <div
-                        id="community"
+                        id="forum"
                         className="overflow-hidden rounded-3xl bg-[#ebeeef] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-8"
                     >
                         <div className="flex h-full flex-col items-center gap-8 md:flex-row-reverse">
@@ -122,7 +122,7 @@ function FeaturesSection() {
                                     </span>
                                 </span>
                                 <h3 className="mb-4 text-[22px] font-semibold leading-[30px] text-[#00343a] sm:text-[24px] sm:leading-[32px]">
-                                    Communauté vibrante
+                                    Reseau vivant
                                 </h3>
                                 <p className="mb-6 text-[15px] font-normal leading-[23px] text-[#40484a] sm:text-[16px] sm:leading-[24px]">
                                     Échangez avec des aînés qui sont passés par là. Conseils
@@ -142,7 +142,7 @@ function FeaturesSection() {
                             <div className="h-64 w-full overflow-hidden rounded-2xl md:h-full md:w-[46%]">
                                 <img
                                     src={CommunityImage}
-                                    alt="Communauté d&apos;étudiants"
+                                    alt="Groupe d&apos;étudiants"
                                     className="h-full w-full object-cover object-center"
                                 />
                             </div>

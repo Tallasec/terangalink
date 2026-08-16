@@ -40,7 +40,7 @@ function ProfileHeader({ user, isEditing, onEdit }) {
 
                     <p className="mt-4 max-w-2xl text-[16px] leading-7 text-[#40484a]">
                         Consultez et modifiez votre identité TerangaLink depuis un espace pensé pour
-                        suivre votre parcours académique et communautaire.
+                        suivre votre parcours académique et collectif.
                     </p>
 
                     <div className="mt-8 flex flex-wrap gap-3">

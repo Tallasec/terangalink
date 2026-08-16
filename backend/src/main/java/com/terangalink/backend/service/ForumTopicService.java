@@ -1,13 +1,16 @@
 package com.terangalink.backend.service;
 
 import com.terangalink.backend.entity.ForumTopic;
+import com.terangalink.backend.entity.ForumTopicView;
 import com.terangalink.backend.entity.User;
 import com.terangalink.backend.enums.ForumCategory;
 import com.terangalink.backend.exception.business.ForumNotFoundException;
 import com.terangalink.backend.exception.business.InvalidCredentialsException;
 import com.terangalink.backend.exception.business.UserNotFoundException;
 import com.terangalink.backend.mapper.ForumTopicMapper;
+import com.terangalink.backend.repository.AnswerRepository;
 import com.terangalink.backend.repository.ForumTopicRepository;
+import com.terangalink.backend.repository.ForumTopicViewRepository;
 import com.terangalink.backend.repository.UserRepository;
 import com.terangalink.backend.requestDTO.CreateForumTopicRequestDTO;
 import com.terangalink.backend.requestDTO.UpdateForumTopicRequestDTO;
@@ -22,6 +25,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /*
 FORUM TOPIC SERVICE
 
@@ -34,15 +39,21 @@ liées aux sujets du forum.
 public class ForumTopicService {
 
     private final ForumTopicRepository forumTopicRepository;
+    private final ForumTopicViewRepository forumTopicViewRepository;
+    private final AnswerRepository answerRepository;
     private final UserRepository userRepository;
     private final ForumTopicMapper forumTopicMapper;
 
     public ForumTopicService(
             ForumTopicRepository forumTopicRepository,
+            ForumTopicViewRepository forumTopicViewRepository,
+            AnswerRepository answerRepository,
             UserRepository userRepository,
             ForumTopicMapper forumTopicMapper
     ) {
         this.forumTopicRepository = forumTopicRepository;
+        this.forumTopicViewRepository = forumTopicViewRepository;
+        this.answerRepository = answerRepository;
         this.userRepository = userRepository;
         this.forumTopicMapper = forumTopicMapper;
     }
@@ -79,9 +90,7 @@ public class ForumTopicService {
                     "Sujet introuvable avec l'id : " + id);
         }
 
-        forumTopic.setViews(forumTopic.getViews() + 1);
-
-        forumTopicRepository.save(forumTopic);
+        incrementViewCountOncePerUser(forumTopic);
 
         return forumTopicMapper.toResponseDto(forumTopic);
     }
@@ -140,6 +149,14 @@ public class ForumTopicService {
 
         ForumTopic forumTopic = findForumTopicByIdOrThrow(id);
 
+        List<com.terangalink.backend.entity.Answer> answers =
+                answerRepository.findByForumTopicIdAndDeletedFalse(id);
+
+        for (com.terangalink.backend.entity.Answer answer : answers) {
+            answer.setDeleted(true);
+        }
+
+        answerRepository.saveAll(answers);
         forumTopic.setDeleted(true);
 
         forumTopicRepository.save(forumTopic);
@@ -169,6 +186,30 @@ public class ForumTopicService {
                 .orElseThrow(() ->
                         new ForumNotFoundException(
                                 "Sujet introuvable avec l'id : " + id));
+    }
+
+    private void incrementViewCountOncePerUser(ForumTopic forumTopic) {
+        UserPrincipal principal = getCurrentPrincipal();
+
+        if (forumTopicViewRepository.existsByForumTopicIdAndUserId(
+                forumTopic.getId(),
+                principal.getId()
+        )) {
+            return;
+        }
+
+        User viewer = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Utilisateur introuvable avec l'id : " + principal.getId()));
+
+        ForumTopicView topicView = new ForumTopicView();
+        topicView.setForumTopic(forumTopic);
+        topicView.setUser(viewer);
+
+        forumTopicViewRepository.save(topicView);
+
+        forumTopic.setViews(forumTopic.getViews() + 1);
+        forumTopicRepository.save(forumTopic);
     }
 
 }
