@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowRight, CheckCircle2, Mail, RefreshCw, ShieldCheck } from "lucide-react";
 
 import PageLayout from "../../components/common/layout/PageLayout";
@@ -13,14 +13,17 @@ import { AUTH_ERROR_CODES, PENDING_VERIFICATION_EMAIL_KEY } from "../../types/au
 function VerifyEmailPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const autoVerifyTriggeredRef = useRef(false);
 
     const isProfileFlow = location.pathname === "/profile/verify-email";
+    const tokenFromQuery = searchParams.get("token")?.trim() || "";
     const returnTo = location.state?.returnTo || (isProfileFlow ? "/profile" : "/login");
 
     const [email] = useState(() => {
         return location.state?.email || sessionStorage.getItem(PENDING_VERIFICATION_EMAIL_KEY) || "";
     });
-    const [token, setToken] = useState("");
+    const [token, setToken] = useState(tokenFromQuery);
     const [message, setMessage] = useState(
         location.state?.message ||
             (isProfileFlow
@@ -32,15 +35,77 @@ function VerifyEmailPage() {
     const [loadingResend, setLoadingResend] = useState(false);
     const [showResendAction, setShowResendAction] = useState(false);
 
-    const canResend = useMemo(() => {
-        return Boolean(email) && !loadingVerify && !loadingResend;
-    }, [email, loadingVerify, loadingResend]);
+    const canResend = Boolean(email) && !loadingVerify && !loadingResend;
+    const hasVerificationContext = Boolean(tokenFromQuery || email || location.state?.message);
 
     useEffect(() => {
         if (email) {
             sessionStorage.setItem(PENDING_VERIFICATION_EMAIL_KEY, email);
         }
     }, [email]);
+
+    useEffect(() => {
+        if (isProfileFlow) {
+            return;
+        }
+
+        if (!hasVerificationContext) {
+            navigate("/login", {
+                replace: true,
+                state: {
+                    message: "Veuillez vous connecter pour continuer.",
+                },
+            });
+        }
+    }, [hasVerificationContext, isProfileFlow, navigate]);
+
+    const submitVerification = useCallback(async (nextToken) => {
+        const trimmedToken = nextToken.trim();
+
+        setError("");
+        setMessage("");
+        setShowResendAction(false);
+
+        if (trimmedToken.length !== 6) {
+            setError("Le code doit contenir 6 chiffres.");
+            return;
+        }
+
+        try {
+            setLoadingVerify(true);
+
+            await verifyEmail(trimmedToken);
+            sessionStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
+
+            navigate(returnTo, {
+                replace: true,
+                state: {
+                    message: isProfileFlow
+                        ? "Votre nouvelle adresse e-mail a été vérifiée avec succès."
+                        : "Votre adresse e-mail a été vérifiée.",
+                },
+            });
+        } catch (requestError) {
+            const responseData = requestError?.response?.data;
+            const errorCode = responseData?.error || responseData?.code || responseData?.errorCode || "";
+            const resolvedMessage = getAuthErrorMessage(requestError);
+
+            setError(resolvedMessage);
+            setShowResendAction(errorCode === AUTH_ERROR_CODES.EXPIRED_EMAIL_VERIFICATION_TOKEN);
+        } finally {
+            setLoadingVerify(false);
+        }
+    }, [isProfileFlow, navigate, returnTo]);
+
+    useEffect(() => {
+        if (!tokenFromQuery || autoVerifyTriggeredRef.current) {
+            return;
+        }
+
+        autoVerifyTriggeredRef.current = true;
+        setToken(tokenFromQuery);
+        void submitVerification(tokenFromQuery);
+    }, [submitVerification, tokenFromQuery]);
 
     function handleTokenChange(event) {
         const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
@@ -51,38 +116,7 @@ function VerifyEmailPage() {
 
     async function handleVerify(event) {
         event.preventDefault();
-        setError("");
-        setMessage("");
-        setShowResendAction(false);
-
-        if (token.length !== 6) {
-            setError("Le code doit contenir 6 chiffres.");
-            return;
-        }
-
-        try {
-            setLoadingVerify(true);
-
-            await verifyEmail(token);
-            sessionStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
-
-            navigate(returnTo, {
-                replace: true,
-                state: {
-                    message: isProfileFlow
-                        ? "Votre nouvelle adresse e-mail a ete verifiee avec succes."
-                        : "Votre adresse e-mail a ete verifiee.",
-                },
-            });
-        } catch (requestError) {
-            const errorCode = requestError?.response?.data?.error;
-            const resolvedMessage = getAuthErrorMessage(requestError);
-
-            setError(resolvedMessage);
-            setShowResendAction(errorCode === AUTH_ERROR_CODES.EXPIRED_EMAIL_VERIFICATION_TOKEN);
-        } finally {
-            setLoadingVerify(false);
-        }
+        await submitVerification(token);
     }
 
     async function handleResend() {
@@ -103,7 +137,7 @@ function VerifyEmailPage() {
 
             const response = await resendVerificationEmail(email);
 
-            setMessage(response?.message || "Un nouveau code a ete envoye.");
+            setMessage(response?.message || "Un nouveau code a été envoyé.");
             setShowResendAction(false);
             setToken("");
         } catch (requestError) {
@@ -224,8 +258,7 @@ function VerifyEmailPage() {
                                         Sécurisez votre compte en quelques secondes.
                                     </h2>
                                     <p className="mt-3 text-sm leading-6 text-white/80">
-                                        Saisissez le code à 6 chiffres pour continuer sur
-                                        TerangaLink.
+                                        Saisissez le code à 6 chiffres pour continuer sur TerangaLink.
                                     </p>
                                 </div>
 
@@ -247,3 +280,6 @@ function VerifyEmailPage() {
 }
 
 export default VerifyEmailPage;
+
+
+

@@ -25,7 +25,7 @@ const CARDS = [
 
 function AssociationsSection() {
     return (
-        <section id="associations" className="bg-[#f7fafb] px-4 py-20 md:px-12 md:py-24">
+        <section id="associations" className="scroll-mt-28 bg-[#f7fafb] px-4 py-20 md:px-12 md:py-24">
             <div className="mx-auto max-w-[1200px]">
                 <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_520px]">
                     <div>
@@ -54,12 +54,6 @@ function AssociationsSection() {
                                 Rejoindre la discussion
                                 <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                             </Link>
-                            <Link
-                                className="inline-flex items-center gap-3 rounded-2xl border border-[#dbe6e6] bg-white px-7 py-4 text-[15px] font-semibold text-[#00343a] transition-colors hover:border-[#00343a]"
-                                to="/forum"
-                            >
-                                Aller au forum
-                            </Link>
                         </div>
                     </div>
 
@@ -85,7 +79,7 @@ function AssociationsSection() {
                         {CARDS.map((card) => (
                             <div
                                 key={card.title}
-                                className="rounded-[28px] border border-[#dbe6e6] bg-white p-8 shadow-[0px_10px_34px_rgba(0,52,58,0.05)]"
+                                className="flex h-full flex-col rounded-[28px] border border-[#dbe6e6] bg-white p-8 shadow-[0px_10px_34px_rgba(0,52,58,0.05)]"
                             >
                                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00343a] text-white">
                                     <span className="material-symbols-outlined text-[24px]">{card.icon}</span>
@@ -95,7 +89,7 @@ function AssociationsSection() {
                                 </h4>
                                 <p className="mt-4 text-[16px] leading-7 text-[#526062]">{card.description}</p>
                                 <Link
-                                    className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-[#00343a] px-6 py-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-95"
+                                    className="mt-auto inline-flex w-full items-center justify-center rounded-2xl bg-[#00343a] px-6 py-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-95"
                                     to="/associations"
                                 >
                                     Parcourir la liste

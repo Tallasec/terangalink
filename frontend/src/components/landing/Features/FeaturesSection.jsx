@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
+
 import MainImage from "../../../assets/img/Main2.PNG";
 import CommunityImage from "../../../assets/img/Main3.PNG";
 
 function FeaturesSection() {
     return (
-        <section id="housing" className="bg-white px-4 py-16 md:px-12 md:py-20">
+        <section id="housing" className="scroll-mt-28 bg-white px-4 py-16 md:px-12 md:py-20">
             <div className="mx-auto max-w-[1200px]">
                 <div className="mb-16 text-center">
                     <h2 className="mb-4 text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-[#00343a] sm:text-[32px] sm:leading-[40px]">
@@ -59,7 +61,7 @@ function FeaturesSection() {
 
                     <div
                         id="jobs"
-                        className="rounded-3xl bg-[#00343a] p-6 text-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-4"
+                        className="scroll-mt-28 rounded-3xl bg-[#00343a] p-6 text-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-4"
                     >
                         <span className="mb-4 block leading-none text-[#99d0d9]">
                             <span className="material-symbols-outlined text-[32px] sm:text-[40px]">
@@ -73,17 +75,17 @@ function FeaturesSection() {
                             Des opportunités adaptées à votre emploi du temps universitaire
                             pour financer vos projets sereinement.
                         </p>
-                        <button
-                            type="button"
-                            className="w-full rounded-xl border border-white/20 bg-white/10 py-3 text-[12px] font-semibold leading-[16px] tracking-[0.05em] transition-all hover:bg-white/20"
+                        <Link
+                            to="/jobs"
+                            className="inline-flex w-full items-center justify-center rounded-xl border border-white/20 bg-white/10 py-3 text-[12px] font-semibold leading-[16px] tracking-[0.05em] transition-all hover:bg-white/20"
                         >
                             Consulter les offres
-                        </button>
+                        </Link>
                     </div>
 
                     <div
                         id="groups"
-                        className="rounded-3xl bg-[#fdd798] p-6 text-[#785c29] shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-4"
+                        className="scroll-mt-28 rounded-3xl bg-[#fdd798] p-6 text-[#785c29] shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-4"
                     >
                         <span className="mb-4 block leading-none text-[#755a26]">
                             <span className="material-symbols-outlined text-[32px] sm:text-[40px]">
@@ -112,7 +114,7 @@ function FeaturesSection() {
 
                     <div
                         id="forum"
-                        className="overflow-hidden rounded-3xl bg-[#ebeeef] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-8"
+                        className="scroll-mt-28 overflow-hidden rounded-3xl bg-[#ebeeef] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-transform duration-300 hover:scale-[1.01] sm:p-8 md:col-span-8"
                     >
                         <div className="flex h-full flex-col items-center gap-8 md:flex-row-reverse">
                             <div className="flex-1">
@@ -128,15 +130,15 @@ function FeaturesSection() {
                                     Échangez avec des aînés qui sont passés par là. Conseils
                                     administratifs, sorties culturelles et entraide quotidienne.
                                 </p>
-                                <button
-                                    type="button"
+                                <Link
+                                    to="/forum"
                                     className="flex items-center gap-2 text-[12px] font-semibold leading-[16px] tracking-[0.05em] text-[#00343a] hover:underline"
                                 >
                                     Rejoindre le forum
                                     <span className="material-symbols-outlined text-[20px]">
                                         arrow_forward
                                     </span>
-                                </button>
+                                </Link>
                             </div>
 
                             <div className="h-64 w-full overflow-hidden rounded-2xl md:h-full md:w-[46%]">
