@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "VALIDATION_ERROR",
-                "Les données de la requête sont invalides.",
+                "Vérifiez les informations saisies et réessayez.",
                 request.getRequestURI(),
                 details
         );
