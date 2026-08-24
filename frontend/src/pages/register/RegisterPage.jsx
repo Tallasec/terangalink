@@ -1,4 +1,4 @@
-// Hooks React
+﻿// Hooks React
 import { useState } from "react";
 
 // Navigation
@@ -40,6 +40,7 @@ function RegisterPage() {
     });
 
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     function handleChange(event) {
         const { name, value } = event.target;
@@ -48,13 +49,18 @@ function RegisterPage() {
             ...previousData,
             [name]: value,
         }));
+
+        if (error) {
+            setError("");
+        }
     }
 
     async function handleSubmit(event) {
         event.preventDefault();
+        setError("");
 
         if (formData.password !== formData.confirmPassword) {
-            alert("Les mots de passe ne correspondent pas.");
+            setError("Les mots de passe ne correspondent pas.");
             return;
         }
 
@@ -75,8 +81,8 @@ function RegisterPage() {
                         "Compte créé avec succès. Vérifiez votre adresse e-mail.",
                 },
             });
-        } catch (error) {
-            alert(getAuthErrorMessage(error, "Le serveur est inaccessible."));
+        } catch (requestError) {
+            setError(getAuthErrorMessage(requestError, "Le serveur est inaccessible."));
         } finally {
             setLoading(false);
         }
@@ -111,8 +117,7 @@ function RegisterPage() {
                                             className="mt-0.5 text-[#fdd798]"
                                         />
                                         <p className="text-[16px] leading-[24px] text-white/90">
-                                            Rejoignez un espace fondé sur la valeur
-                                            sénégalaise de la Teranga.
+                                            Rejoignez un espace fondé sur la valeur sénégalaise de la Teranga.
                                         </p>
                                     </div>
 
@@ -123,8 +128,7 @@ function RegisterPage() {
                                             className="mt-0.5 text-[#fdd798]"
                                         />
                                         <p className="text-[16px] leading-[24px] text-white/90">
-                                            Naviguez dans votre parcours académique en France avec
-                                            des guides de confiance.
+                                            Naviguez dans votre parcours académique en France avec des guides de confiance.
                                         </p>
                                     </div>
                                 </div>
@@ -140,6 +144,18 @@ function RegisterPage() {
                                     Rejoignez le réseau des étudiants sénégalais en France.
                                 </p>
                             </div>
+
+                            {error && (
+                                <div
+                                    className="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-900"
+                                    role="alert"
+                                >
+                                    <span className="material-symbols-outlined mt-0.5 text-[20px]">
+                                        error
+                                    </span>
+                                    <p className="text-sm leading-6">{error}</p>
+                                </div>
+                            )}
 
                             <form className="space-y-6" onSubmit={handleSubmit}>
                                 <div className="grid gap-6 sm:grid-cols-2">
